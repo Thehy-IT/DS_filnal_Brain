@@ -103,6 +103,8 @@ def train_model(data_dir: str, model_name: str = 'vit', batch_size: int = 32, ep
     print(classification_report(all_labels, all_preds, target_names=['glioma', 'meningioma', 'notumor', 'pituitary']))
 
 if __name__ == "__main__":
-    # Example usage:
-    # train_model(data_dir="data/Training", model_name="vit", epochs=10)
-    pass
+    # Default path to the Training data directory
+    data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'Training'))
+    
+    # Start training with Vision Transformer (ViT)
+    train_model(data_dir=data_path, model_name="vit", batch_size=32, epochs=10, lr=1e-4)

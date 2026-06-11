@@ -2,10 +2,11 @@ import streamlit as st
 import requests
 import io
 import base64
+import os
 from PIL import Image
 
 # Config
-API_URL = "http://127.0.0.1:8000/predict"
+API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000/predict")
 
 st.set_page_config(
     page_title="BrainTumorAI - Phân tích MRI",

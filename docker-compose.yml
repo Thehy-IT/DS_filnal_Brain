@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: app/backend/Dockerfile
+    container_name: braintumorai_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models  # Map model folder to allow updating model without rebuild
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: .
+      dockerfile: app/frontend/Dockerfile
+    container_name: braintumorai_frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_URL=http://backend:8000/predict # Override API url in docker network
