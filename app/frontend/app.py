@@ -14,7 +14,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🧠 BrainTumorAI: Hệ thống chẩn đoán khối u não")
+st.title("BrainTumorAI: Hệ thống chẩn đoán khối u não")
 st.markdown("""
 Hệ thống sử dụng **Vision Transformer (ViT)** để phát hiện và phân loại khối u não từ ảnh MRI.
 Đồng thời, **Explainable AI (Grad-CAM)** được tích hợp để giải thích vùng tập trung của mô hình.
