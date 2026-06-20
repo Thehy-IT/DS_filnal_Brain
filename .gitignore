@@ -225,3 +225,6 @@ models/
 .vscode/
 .idea/
 
+#config cá nhân.
+AGENTS.md
+instruction.md
