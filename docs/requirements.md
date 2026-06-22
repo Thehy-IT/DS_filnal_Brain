@@ -2,7 +2,7 @@
 
 # Project Title
 
-**BrainTumorAI - Hệ thống phát hiện và giải thích khối u não trên ảnh MRI sử dụng Vision Transformer và Explainable AI**
+**BrainTumorAI - Hệ thống phát hiện và giải thích khối u não trên ảnh MRI sử dụng EfficientNetB0 và Explainable AI**
 
 ---
 
@@ -87,7 +87,7 @@ MRI Image
 Data Preprocessing
      │
      ▼
-Vision Transformer
+EfficientNetB0
      │
      ├────────► Tumor Classification
      │
@@ -230,7 +230,7 @@ Các kỹ thuật:
 
 ### Main Model
 
-Vision Transformer (ViT-B16)
+EfficientNetB0
 
 ---
 
@@ -266,7 +266,7 @@ Mục tiêu:
 | Data Processing      | Pandas, NumPy       |
 | Visualization        | Matplotlib, Seaborn |
 | Deep Learning        | PyTorch             |
-| Transfer Learning    | ViT-B16             |
+| Transfer Learning    | EfficientNetB0      |
 | Explainable AI       | Grad-CAM            |
 | Backend API          | FastAPI             |
 | Frontend             | Streamlit           |

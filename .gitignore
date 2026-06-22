@@ -228,3 +228,4 @@ models/
 #config cá nhân.
 AGENTS.md
 instruction.md
+*.zip

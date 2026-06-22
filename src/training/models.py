@@ -33,25 +33,25 @@ class BaselineCNN(nn.Module):
         x = self.classifier(x)
         return x
 
-class ViTModel(nn.Module):
+class EfficientNetModel(nn.Module):
     """
-    Vision Transformer (ViT-B16) wrapper using timm library.
+    EfficientNetB0 wrapper using timm library.
     """
     def __init__(self, num_classes: int = 4, pretrained: bool = True):
-        super(ViTModel, self).__init__()
-        # Load pre-trained ViT model
-        self.model = timm.create_model('vit_base_patch16_224', pretrained=pretrained, num_classes=num_classes)
+        super(EfficientNetModel, self).__init__()
+        # Load pre-trained EfficientNet model
+        self.model = timm.create_model('efficientnet_b0', pretrained=pretrained, num_classes=num_classes)
 
     def forward(self, x):
         return self.model(x)
 
-def get_model(model_name: str = 'vit', num_classes: int = 4, pretrained: bool = True):
+def get_model(model_name: str = 'efficientnet', num_classes: int = 4, pretrained: bool = True):
     """
     Factory function to get the specified model.
     """
     if model_name.lower() == 'cnn':
         return BaselineCNN(num_classes=num_classes)
-    elif model_name.lower() == 'vit':
-        return ViTModel(num_classes=num_classes, pretrained=pretrained)
+    elif model_name.lower() == 'efficientnet':
+        return EfficientNetModel(num_classes=num_classes, pretrained=pretrained)
     else:
-        raise ValueError(f"Model {model_name} not supported. Use 'cnn' or 'vit'.")
+        raise ValueError(f"Model {model_name} not supported. Use 'cnn' or 'efficientnet'.")

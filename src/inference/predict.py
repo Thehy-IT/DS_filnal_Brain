@@ -9,7 +9,7 @@ class TumorPredictor:
     """
     Class to handle model loading and inference for a single image.
     """
-    def __init__(self, model_path: str, model_name: str = 'vit', device: str = None):
+    def __init__(self, model_path: str, model_name: str = 'efficientnet', device: str = None):
         self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         self.classes = ['glioma', 'meningioma', 'notumor', 'pituitary']
         self.transform = get_valid_transforms()

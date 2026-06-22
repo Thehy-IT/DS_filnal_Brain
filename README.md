@@ -1,226 +1,217 @@
-# BrainTumorAI
+# BrainTumorAI v2.0
 
-**Hệ thống phát hiện và giải thích khối u não trên ảnh MRI sử dụng Vision Transformer và Explainable AI**
+**Hệ thống phát hiện và giải thích khối u não trên ảnh MRI sử dụng PyTorch (EfficientNetB0), Explainable AI (Grad-CAM), FastAPI và Next.js**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.2-orange.svg)
+![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688.svg)
+
+---
 
 ## Giới thiệu dự án
 
-Khối u não là một trong những bệnh lý nguy hiểm có thể ảnh hưởng nghiêm trọng đến sức khỏe và tính mạng người bệnh. Dự án **BrainTumorAI** hướng đến việc xây dựng một hệ thống hỗ trợ phát hiện và phân loại khối u não từ ảnh cộng hưởng từ (MRI) thành 4 lớp:
+Dự án **BrainTumorAI** là một hệ thống phân loại ảnh MRI não thành **4 lớp**, đi kèm với bản đồ giải thích (Heatmap) giúp bác sĩ/người dùng hiểu được quyết định của AI.
 
-- **Glioma** (U thần kinh đệm)
-- **Meningioma** (U màng não)
-- **Pituitary** (U tuyến yên)
-- **No Tumor** (Không có khối u)
+| Lớp                 | Mô tả                                                        |
+| -------------------- | -------------------------------------------------------------- |
+| **Glioma**     | U thần kinh đệm — phát sinh từ tế bào thần kinh đệm |
+| **Meningioma** | U màng não — thường lành tính, phát triển chậm       |
+| **Pituitary**  | U tuyến yên — có thể gây rối loạn hormone              |
+| **No Tumor**   | Não bình thường — lớp đối chứng âm tính             |
 
-Hệ thống sử dụng kiến trúc **Vision Transformer (ViT-B16)** để phân loại, đồng thời cung cấp khả năng giải thích quyết định của AI thông qua kỹ thuật **Explainable AI (Grad-CAM / Attention Rollout)** nhằm tăng độ tin cậy cho người sử dụng.
+**Điểm nhấn công nghệ:**
+
+- **Mô hình**: PyTorch + `timm` (EfficientNetB0) hoặc Baseline CNN.
+- **Explainable AI (XAI)**: Tích hợp **Grad-CAM** làm nổi bật các khu vực quan trọng quyết định dự đoán.
+- **Backend API**: Xây dựng bằng FastAPI, xử lý song song, trả về xác suất và ảnh Grad-CAM Base64.
+- **Frontend**: Giao diện web hiện đại xây dựng trên nền tảng **Next.js (App Router)** và **Tailwind CSS**.
+
+---
 
 ## Cấu trúc dự án
 
-```bash
+```text
 BrainTumorAI/
-├── app/                  # Frontend & Backend Code
-│   ├── frontend/         # Streamlit UI
-│   └── backend/          # FastAPI REST API
-├── data/                 # Raw and Processed Data
-├── docs/                 # Documentation & Requirements
-├── models/               # Saved Model Weights (.pth)
-├── notebooks/            # Jupyter Notebooks for EDA & Prototyping
-├── reports/              # Generated reports & graphs
-├── src/                  # Source Code
-│   ├── preprocessing/    # Data preparation pipelines
-│   ├── training/         # Model definition & training loops
-│   ├── inference/        # Model loading & inference
-│   └── explainability/   # Grad-CAM / XAI implementation
+├── app/
+│   ├── frontend/         # Next.js Web App (React 19, Tailwind CSS v4)
+│   └── backend/          # FastAPI REST API (Inference & Grad-CAM)
+├── data/
+│   ├── Training/         # Dữ liệu huấn luyện (4 thư mục lớp)
+│   └── Testing/          # Dữ liệu kiểm thử
+├── models/               # Nơi lưu các file checkpoint (.pth)
+├── src/
+│   ├── config.py         # Cấu hình tập trung toàn bộ dự án
+│   ├── utils.py          # Helper functions (seed, paths)
+│   ├── preprocessing/    # Xử lý dữ liệu, augmentation pipeline
+│   ├── training/         # Cấu trúc huấn luyện 2-phase, EarlyStopping
+│   ├── inference/        # Lớp TumorPredictor
+│   └── explainability/   # Tích hợp Grad-CAM tự động phát hiện target layer
+├── tests/                # Bộ kiểm thử tự động (Pytest)
+├── .env.example          # Mẫu biến môi trường
+├── docker-compose.yml    # Docker config
+├── pytest.ini            # Cấu hình Pytest
 ├── requirements.txt      # Python dependencies
-└── README.md             # Project documentation
+└── README.md             # Tài liệu này
 ```
 
-## ⚙️ Hướng dẫn cài đặt
+---
 
-### 1. Khởi tạo môi trường ảo (Virtual Environment)
+## Bắt đầu nhanh
 
-Khuyến nghị sử dụng Python 3.9 hoặc mới hơn.
+### 1. Cài đặt Backend (FastAPI & PyTorch)
+
+Yêu cầu: Python 3.9+
 
 ```bash
-# Tạo môi trường ảo
+# Tạo và kích hoạt môi trường ảo
 python -m venv venv
 
-# Kích hoạt môi trường (Windows)
-venv\Scripts\activate
+# Windows
+venv\Scripts\activate        
+# Linux/Mac
+source venv/bin/activate     
 
-# Kích hoạt môi trường (Linux/Mac)
-source venv/bin/activate
-```
-
-### 2. Cài đặt các thư viện cần thiết
-
-```bash
+# Cài đặt dependencies
 pip install -r requirements.txt
+
+# (Tuỳ chọn) Tạo file .env từ template
+cp .env.example .env
 ```
 
-## Hướng dẫn sử dụng
+### 2. Cài đặt Frontend (Next.js)
 
-### 3. Chuẩn bị dữ liệu
-
-Đảm bảo dữ liệu MRI được tổ chức theo cấu trúc:
-
-```
-data/
-├── Training/
-│   ├── glioma/
-│   ├── meningioma/
-│   ├── notumor/
-│   └── pituitary/
-└── Testing/
-    ├── glioma/
-    ├── meningioma/
-    ├── notumor/
-    └── pituitary/
-```
-
-### 4. Huấn luyện mô hình
-
-#### Huấn luyện với Vision Transformer (ViT-B16 - Khuyến nghị):
+Yêu cầu: Node.js 18+
 
 ```bash
-python src/training/train.py \
-  --data-dir data/Training \
-  --model-name vit \
-  --batch-size 32 \
-  --epochs 50 \
-  --lr 1e-4 \
-  --save-dir models
+cd app/frontend
+npm install
 ```
 
-#### Huấn luyện với CNN Baseline:
+### 3. Khám phá & Tiền xử lý dữ liệu (EDA)
 
-```bash
-python src/training/train.py \
-  --data-dir data/Training \
-  --model-name cnn \
-  --batch-size 32 \
-  --epochs 30 \
-  --lr 1e-3 \
-  --save-dir models
+```python
+# Chạy trong môi trường Python hoặc Jupyter Notebook
+from src.preprocessing.eda import full_eda_report
+full_eda_report(data_dir="data/Training")
+# Báo cáo biểu đồ sẽ lưu tại: reports/figures/eda/
 ```
 
-**Tùy chọn phổ biến:**
+### 4. Huấn luyện mô hình (Training)
 
-- `--data-dir`: Đường dẫn đến thư mục dữ liệu huấn luyện
-- `--model-name`: Tên mô hình (`vit` hoặc `cnn`)
-- `--batch-size`: Kích thước batch (mặc định: 32)
-- `--epochs`: Số epochs (mặc định: 50)
-- `--lr`: Learning rate (mặc định: 1e-4)
-- `--save-dir`: Thư mục lưu mô hình (mặc định: `models/`)
+Mô hình mặc định được tối ưu qua phương pháp **2-phase fine-tuning**:
 
-Mô hình tốt nhất sẽ được lưu tại `models/vit_best.pth` hoặc `models/cnn_best.pth`.
-
-### 5. Chạy Backend Server (FastAPI)
+1. Đóng băng backbone, chỉ train classifier (5 epochs, LR cao).
+2. Mở băng toàn bộ, fine-tune toàn hệ thống (25 epochs, LR thấp).
 
 ```bash
+# Quay lại thư mục gốc dự án
+# Train bằng EfficientNetB0 (Khuyến nghị)
+python src/training/train.py --model-name efficientnet --epochs 30
+
+# Train bằng Baseline CNN (Nhanh hơn, dùng để so sánh)
+python src/training/train.py --model-name cnn --epochs 20
+```
+
+> Trọng số tốt nhất sẽ tự động được lưu vào thư mục `models/`.
+
+### 5. Khởi động Hệ thống (Phục vụ Dự đoán)
+
+Cần mở 2 Terminal riêng biệt:
+
+**Terminal 1 — Backend (FastAPI)**
+
+```bash
+# Đứng tại thư mục gốc của dự án, kích hoạt venv (nếu chưa)
 uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-API Documentation sẽ có sẵn tại `http://127.0.0.1:8000/docs` (Swagger UI).
-
-**Endpoint chính:**
-
-- `POST /predict`: Nhận ảnh MRI và trả về dự đoán + heatmap Grad-CAM
-  - Input: `file` (PNG, JPG, JPEG)
-  - Output: JSON với `class_name`, `confidence`, `heatmap_base64`
-
-### 6. Chạy Frontend Dashboard (Streamlit)
+**Terminal 2 — Frontend (Next.js)**
 
 ```bash
-streamlit run app/frontend/app.py
+cd app/frontend
+npm run dev
+# Mở trình duyệt tại: http://localhost:3000
 ```
 
-Dashboard sẽ mở tại `http://localhost:8501`. Bạn có thể:
+---
 
-- Tải ảnh MRI lên
-- Xem dự đoán mô hình
-- Quan sát heatmap Grad-CAM để hiểu quyết định của AI
+## Kiểm thử (Testing)
 
-### 7. Chạy toàn bộ hệ thống với Docker Compose
+Dự án có bộ test suite với hàng chục test cases bao phủ toàn bộ pipeline:
 
 ```bash
-docker-compose up -d
+pytest tests/ -v
 ```
 
-Truy cập:
+*Gồm: test_api.py, test_dataset.py, test_eda.py, test_models.py, test_transforms.py, test_utils.py*
 
-- Frontend: `http://localhost:8501`
-- Backend API: `http://localhost:8000`
-- API Docs: `http://localhost:8000/docs`
+---
 
-### 8. Phân tích dữ liệu với Jupyter Notebooks
+## Pipeline Machine Learning
 
-```bash
-jupyter notebook
+```text
+data/Training/
+    │
+    ↓ [EDA] class_distribution → check_integrity
+    ↓ [Preprocessing] Stratified split 80/20 · class_weight
+    ↓ [Augmentation] Flip · Rotation · Affine · ColorJitter · RandomErasing
+    ↓ [Phase 1] Freeze backbone → train classifier (lr=1e-3)
+    ↓ [Phase 2] Unfreeze all → fine-tune (lr=1e-4)
+    ↓ [EarlyStopping] patience=5 · restore best weights
+    ↓ [Checkpoint] models/efficientnet_best.pth
+    ↓ [Evaluate] Confusion Matrix · ROC-AUC
+    ↓ [Serve] FastAPI /predict → Grad-CAM overlay → Next.js Web App
 ```
 
-Mở `notebooks/01_EDA_Deep_Analysis.ipynb` để:
+---
 
-- Khám phá phân bố dữ liệu
-- Phân tích đặc trưng hình ảnh
-- Trực quan hóa các ví dụ từng lớp
+## API Endpoints (Backend)
+
+| Method   | Endpoint     | Mô tả                                        |
+| -------- | ------------ | ---------------------------------------------- |
+| `GET`  | `/`        | Thông tin API cơ bản                        |
+| `GET`  | `/health`  | Kiểm tra trạng thái mô hình và kết nối |
+| `GET`  | `/classes` | Danh sách 4 nhãn phân loại                 |
+| `POST` | `/predict` | Phân loại ảnh + Trả về Grad-CAM           |
+| `GET`  | `/docs`    | Giao diện thử nghiệm Swagger UI             |
+
+**Request `/predict`:** Upload file (PNG / JPEG / JPG), giới hạn mặc định 10MB.
+
+**Response `/predict`:**
+
+```json
+{
+  "class_name": "GLIOMA",
+  "confidence": 0.923456,
+  "probabilities": {
+    "glioma": 0.923456,
+    "meningioma": 0.042100,
+    "notumor": 0.020200,
+    "pituitary": 0.014244
+  },
+  "heatmap_base64": "/9j/4AAQSkZJRgABAQ..."
+}
+```
 
 ---
 
-## Kết quả và Hiệu suất
+## Đánh giá hiệu năng (Ước tính)
 
-### Hiệu suất mô hình (Ước tính):
-
-- **Vision Transformer (ViT-B16)**: ~95-97% accuracy
-- **Baseline CNN**: ~85-90% accuracy
-
-### Explainability:
-
-- **Grad-CAM**: Trực quan hóa vùng mô hình chú ý khi phân loại
-- **Attention Rollout**: Tổng hợp attention từ các layer để hiểu quyết định
+| Model                                          | Accuracy | Macro F1 |
+| ---------------------------------------------- | -------- | -------- |
+| **EfficientNetB0** (2-phase fine-tuning) | ~95–97% | ~0.95    |
+| **CNN Baseline**                         | ~85–90% | ~0.85    |
 
 ---
 
-## Tài liệu bổ sung
+## Tuyên bố miễn trừ trách nhiệm
 
-- [Requirements Specification](docs/requirements.md) - Mô tả chi tiết yêu cầu dự án
-- [Jupyter Notebooks](notebooks/) - EDA, prototyping, và phân tích sâu
-- [Reports](reports/) - Báo cáo kết quả và trực quan hóa
+> ⚠️ **Lưu ý y tế:** Hệ thống này là **công cụ học thuật và hỗ trợ sàng lọc**, **KHÔNG** thay thế cho các chẩn đoán chính thức của bác sĩ chuyên khoa. Mọi quyết định lâm sàng phải dựa trên thăm khám thực tế và ý kiến chuyên môn.
 
 ---
 
-## Đóng góp
-
-Nếu bạn muốn đóng góp vào dự án, vui lòng:
-
-1. Fork repository này
-2. Tạo branch mới (`git checkout -b feature/improvement`)
-3. Commit thay đổi của bạn (`git commit -m 'Add improvement'`)
-4. Push lên branch (`git push origin feature/improvement`)
-5. Tạo Pull Request
-
-## Nhóm phát triển
-
-| Vai trò                             | Người phát triển |
-| ------------------------------------ | -------------------- |
-| **Project Lead & ML Engineer** | Tên không có sẵn |
-| **Data Engineer**              | Tên không có sẵn |
-| **Backend Developer**          | Tên không có sẵn |
-| **Frontend Developer**         | Tên không có sẵn |
-
-*Để cập nhật thông tin nhóm, vui lòng chỉnh sửa README.md này.*
-
----
-
-## Liên hệ
-
-- **Email**: huynhthehy2005@gmail.com
-- **Issues & Questions**: Mở issue trên GitHub
-- **Documentation**: Xem [docs/](docs/) folder
-
----
-
-**Last Updated**: 2026-06-11
+**Tác giả**: Huỳnh Thế Hy
+**Email**: huynhthehy2005@gmail.com
+**Cập nhật lần cuối**: 2026-06-22 — Phiên bản 2.0.1
