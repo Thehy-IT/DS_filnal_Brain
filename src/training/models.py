@@ -2,36 +2,18 @@ import torch
 import torch.nn as nn
 import timm
 
-class BaselineCNN(nn.Module):
+class DenseNetModel(nn.Module):
     """
-    A simple baseline Convolutional Neural Network for benchmarking.
+    DenseNet121 wrapper using timm library.
+    Used as the secondary main model for deep medical benchmark comparison.
     """
-    def __init__(self, num_classes: int = 4):
-        super(BaselineCNN, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2)
-        )
-        self.classifier = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Flatten(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(64, num_classes)
-        )
+    def __init__(self, num_classes: int = 4, pretrained: bool = True):
+        super(DenseNetModel, self).__init__()
+        # Load pre-trained DenseNet121 model
+        self.model = timm.create_model('densenet121', pretrained=pretrained, num_classes=num_classes)
 
     def forward(self, x):
-        x = self.features(x)
-        x = self.classifier(x)
-        return x
+        return self.model(x)
 
 class EfficientNetModel(nn.Module):
     """
@@ -49,9 +31,9 @@ def get_model(model_name: str = 'efficientnet', num_classes: int = 4, pretrained
     """
     Factory function to get the specified model.
     """
-    if model_name.lower() == 'cnn':
-        return BaselineCNN(num_classes=num_classes)
+    if model_name.lower() == 'densenet':
+        return DenseNetModel(num_classes=num_classes, pretrained=pretrained)
     elif model_name.lower() == 'efficientnet':
         return EfficientNetModel(num_classes=num_classes, pretrained=pretrained)
     else:
-        raise ValueError(f"Model {model_name} not supported. Use 'cnn' or 'efficientnet'.")
+        raise ValueError(f"Model {model_name} not supported. Use 'densenet' or 'efficientnet'.")

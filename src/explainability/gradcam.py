@@ -32,10 +32,10 @@ def _get_target_layer(model: nn.Module) -> nn.Module:
     Automatically select the best Grad-CAM target layer for supported models.
 
     For EfficientNetB0 (timm): last convolutional block before the pooling.
-    For BaselineCNN: last Conv2d in the feature extractor.
+    For DenseNetModel (timm): features.norm5.
 
     Args:
-        model: The loaded model (EfficientNetModel or BaselineCNN instance).
+        model: The loaded model (EfficientNetModel or DenseNetModel instance).
 
     Returns:
         nn.Module — the target layer.
@@ -48,13 +48,11 @@ def _get_target_layer(model: nn.Module) -> nn.Module:
         # timm EfficientNet: conv_head is the final 1×1 conv before pooling
         return model.model.conv_head
 
-    # BaselineCNN: last Conv2d in self.features
-    if hasattr(model, "features"):
-        conv_layers = [
-            m for m in model.features.modules() if isinstance(m, nn.Conv2d)
-        ]
-        if conv_layers:
-            return conv_layers[-1]
+    # DenseNetModel: timm densenet has self.model.features (and norm5 is the last layer in features)
+    if hasattr(model, "model") and hasattr(model.model, "features"):
+        if hasattr(model.model.features, "norm5"):
+            return model.model.features.norm5
+        return model.model.features
 
     raise ValueError(
         "Cannot auto-detect Grad-CAM target layer for this model. "

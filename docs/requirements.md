@@ -225,7 +225,7 @@ Các kỹ thuật:
 
 ### Baseline Models
 
-* CNN
+* DenseNet121
 * ResNet50
 
 ### Main Model

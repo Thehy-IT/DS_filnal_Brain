@@ -202,7 +202,7 @@ def train_model(
 
     Args:
         data_dir:   Path to training data directory. Defaults to config.
-        model_name: 'efficientnet' | 'cnn'. Defaults to config.
+        model_name: 'efficientnet' | 'densenet'. Defaults to config.
         batch_size: Mini-batch size. Defaults to config.
         epochs:     TOTAL epochs (phases combined). Defaults to config.
         lr:         Phase-2 fine-tuning learning rate. Defaults to config.
@@ -257,8 +257,8 @@ def train_model(
     # PHASE 1 — Freeze backbone, train classifier head only
     # (From DAKHDL: first train only the new top layers)
     # ==================================================================
-    if model_name.lower() == "efficientnet":
-        print("\n[Phase 1] Freezing EfficientNet backbone …")
+    if model_name.lower() in ["efficientnet", "densenet"]:
+        print(f"\n[Phase 1] Freezing {model_name} backbone …")
         for param in model.model.parameters():
             param.requires_grad = False
         # Unfreeze the final classification head
@@ -285,7 +285,7 @@ def train_model(
             save_dir=save_dir, model_name=model_name,
         )
     else:
-        print("[Phase 1] Skipped (CNN baseline — no backbone to freeze)")
+        print(f"[Phase 1] Skipped for model {model_name} (if no clear backbone to freeze) — please verify implementation if needed")
 
     # ==================================================================
     # PHASE 2 — Unfreeze all layers for fine-tuning
@@ -350,7 +350,7 @@ def train_model(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Train BrainTumorAI (EfficientNetB0 / CNN Baseline)"
+        description="Train BrainTumorAI (EfficientNetB0 / DenseNet121)"
     )
     parser.add_argument(
         "--data-dir", type=str, default=None,
@@ -358,7 +358,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--model-name", type=str, default=None,
-        choices=["efficientnet", "cnn"],
+        choices=["efficientnet", "densenet"],
         help="Model architecture to train"
     )
     parser.add_argument(
