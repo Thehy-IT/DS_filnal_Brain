@@ -69,9 +69,9 @@ Yêu cầu: Python 3.9+
 python -m venv venv
 
 # Windows
-venv\Scripts\activate        
+venv\Scripts\activate      
 # Linux/Mac
-source venv/bin/activate     
+source venv/bin/activate   
 
 # Cài đặt dependencies
 pip install -r requirements.txt
@@ -92,7 +92,7 @@ npm install
 ### 3. Khám phá & Tiền xử lý dữ liệu (EDA)
 
 ```python
-# Chạy trong môi trường Python hoặc Jupyter Notebook
+1# Chạy trong môi trường Python hoặc Jupyter Notebook
 from src.preprocessing.eda import full_eda_report
 full_eda_report(data_dir="data/Training")
 # Báo cáo biểu đồ sẽ lưu tại: reports/figures/eda/

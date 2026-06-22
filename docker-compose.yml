@@ -19,9 +19,8 @@ services:
       dockerfile: app/frontend/Dockerfile
     container_name: braintumorai_frontend
     ports:
-      - "8501:8501"
+      - "3000:3000"
     depends_on:
       - backend
     environment:
-      - PYTHONUNBUFFERED=1
-      - API_URL=http://backend:8000/predict # Override API url in docker network
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/predict
