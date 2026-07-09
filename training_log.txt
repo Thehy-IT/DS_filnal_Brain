@@ -1,0 +1,117 @@
+[utils] Seed set to 42
+[utils] Using device: cpu
+
+[Train] Preparing datasets …
+[Dataset]        glioma:  1400 images
+[Dataset]    meningioma:  1400 images
+[Dataset]       notumor:  1400 images
+[Dataset]     pituitary:  1400 images
+[Dataset] Total images loaded: 5600
+[Dataset] Split -> train: 4480 | val: 1120 (stratified, seed=42)
+[Dataset]        glioma:  1400 images
+[Dataset]    meningioma:  1400 images
+[Dataset]       notumor:  1400 images
+[Dataset]     pituitary:  1400 images
+[Dataset] Total images loaded: 5600
+[Dataset]        glioma:  1400 images
+[Dataset]    meningioma:  1400 images
+[Dataset]       notumor:  1400 images
+[Dataset]     pituitary:  1400 images
+[Dataset] Total images loaded: 5600
+
+[Train] Initialising model: efficientnet …
+
+[Phase 1] Freezing efficientnet backbone …
+
+============================================================
+  PHASE: Phase 1 — Classifier Head  (5 epochs max)
+============================================================
+  Epoch  1/5 | Train Loss: 2.0936  Acc: 0.4594 | Val Loss: 1.7222  Acc: 0.5000 | LR: 1.00e-03
+  [Saved] Checkpoint saved  (val_acc=0.5000) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  2/5 | Train Loss: 1.1122  Acc: 0.6801 | Val Loss: 1.3362  Acc: 0.5920 | LR: 1.00e-03
+  [Saved] Checkpoint saved  (val_acc=0.5920) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  3/5 | Train Loss: 0.8768  Acc: 0.7357 | Val Loss: 1.3470  Acc: 0.6000 | LR: 1.00e-03
+  [Saved] Checkpoint saved  (val_acc=0.6000) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  4/5 | Train Loss: 0.8234  Acc: 0.7629 | Val Loss: 1.0454  Acc: 0.6616 | LR: 1.00e-03
+  [Saved] Checkpoint saved  (val_acc=0.6616) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  5/5 | Train Loss: 0.7387  Acc: 0.7772 | Val Loss: 1.0557  Acc: 0.6687 | LR: 1.00e-03
+  [Saved] Checkpoint saved  (val_acc=0.6687) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+
+[Phase 2] Unfreezing ALL layers for fine-tuning …
+
+============================================================
+  PHASE: Phase 2 — Full Fine-Tuning  (35 epochs max)
+============================================================
+  Epoch  1/35 | Train Loss: 0.5034  Acc: 0.8478 | Val Loss: 0.3695  Acc: 0.8839 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.8839) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  2/35 | Train Loss: 0.2236  Acc: 0.9234 | Val Loss: 0.1975  Acc: 0.9304 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9304) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  3/35 | Train Loss: 0.1625  Acc: 0.9480 | Val Loss: 0.1535  Acc: 0.9429 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9429) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  4/35 | Train Loss: 0.1129  Acc: 0.9560 | Val Loss: 0.1797  Acc: 0.9384 | LR: 1.00e-04
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  5/35 | Train Loss: 0.0695  Acc: 0.9748 | Val Loss: 0.1476  Acc: 0.9509 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9509) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  6/35 | Train Loss: 0.0603  Acc: 0.9777 | Val Loss: 0.1236  Acc: 0.9589 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9589) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  7/35 | Train Loss: 0.0609  Acc: 0.9792 | Val Loss: 0.0574  Acc: 0.9777 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9777) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  8/35 | Train Loss: 0.0562  Acc: 0.9806 | Val Loss: 0.0579  Acc: 0.9768 | LR: 1.00e-04
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch  9/35 | Train Loss: 0.0394  Acc: 0.9875 | Val Loss: 0.0429  Acc: 0.9830 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9830) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 10/35 | Train Loss: 0.0290  Acc: 0.9906 | Val Loss: 0.0489  Acc: 0.9866 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9866) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 11/35 | Train Loss: 0.0247  Acc: 0.9931 | Val Loss: 0.0450  Acc: 0.9875 | LR: 1.00e-04
+  [Saved] Checkpoint saved  (val_acc=0.9875) -> E:\DS_filnal_Brain\models\efficientnet_best.pth
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 12/35 | Train Loss: 0.0268  Acc: 0.9908 | Val Loss: 0.0674  Acc: 0.9759 | LR: 1.00e-04
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 13/35 | Train Loss: 0.0232  Acc: 0.9924 | Val Loss: 0.0577  Acc: 0.9795 | LR: 1.00e-04
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 14/35 | Train Loss: 0.0276  Acc: 0.9911 | Val Loss: 0.0582  Acc: 0.9786 | LR: 1.00e-04
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 15/35 | Train Loss: 0.0130  Acc: 0.9949 | Val Loss: 0.0672  Acc: 0.9750 | LR: 5.00e-05
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 16/35 | Train Loss: 0.0168  Acc: 0.9940 | Val Loss: 0.0542  Acc: 0.9821 | LR: 5.00e-05
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 17/35 | Train Loss: 0.0157  Acc: 0.9946 | Val Loss: 0.0489  Acc: 0.9821 | LR: 5.00e-05
+  [Safety] Pausing for 5 seconds to cool down hardware...
+  Epoch 18/35 | Train Loss: 0.0106  Acc: 0.9964 | Val Loss: 0.0449  Acc: 0.9875 | LR: 5.00e-05
+
+[EarlyStopping] No improvement for 7 epochs. Best val_acc = 0.9875
+[EarlyStopping] Restored best weights (val_acc=0.9875)
+
+============================================================
+  TRAINING COMPLETE
+============================================================
+
+Best val_acc: 0.9875
+
+Classification Report (Validation Set):
+              precision    recall  f1-score   support
+
+      glioma       0.98      0.99      0.99       280
+  meningioma       0.98      0.98      0.98       280
+     notumor       1.00      0.99      0.99       280
+   pituitary       0.99      0.99      0.99       280
+
+    accuracy                           0.99      1120
+   macro avg       0.99      0.99      0.99      1120
+weighted avg       0.99      0.99      0.99      1120
+
+[utils] Training history saved -> E:\DS_filnal_Brain\reports\training_history.json
+
+Training history -> E:\DS_filnal_Brain\reports\training_history.json
