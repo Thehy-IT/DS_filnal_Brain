@@ -51,12 +51,12 @@ async def lifespan(app: FastAPI):
                 model_path=model_path,
                 model_name=inference_cfg.model_name,
             )
-            print(f"[API] Model loaded ✓  ({model_path})")
+            print(f"[API] Model loaded successfully  ({model_path})")
         except Exception as exc:
-            print(f"[API] ERROR — could not load model: {exc}")
+            print(f"[API] ERROR - could not load model: {exc}")
     else:
         print(
-            f"[API] WARNING — model not found at '{model_path}'. "
+            f"[API] WARNING - model not found at '{model_path}'. "
             "Train the model first, then restart the server."
         )
 

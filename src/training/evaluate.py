@@ -98,7 +98,7 @@ def plot_confusion_matrix(
     if save:
         path = os.path.join(_figures_dir(), "confusion_matrix.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
-        print(f"[Evaluate] Confusion matrix → {path}")
+        print(f"[Evaluate] Confusion matrix -> {path}")
 
     plt.close(fig)
     return cm
@@ -169,7 +169,7 @@ def plot_training_history(
     if save:
         path = os.path.join(_figures_dir(), "training_history.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
-        print(f"[Evaluate] Training history → {path}")
+        print(f"[Evaluate] Training history -> {path}")
 
     plt.close(fig)
 
@@ -203,7 +203,7 @@ def plot_roc_curves(
     y_bin = label_binarize(y_true, classes=list(range(num_classes)))
 
     fig, ax = plt.subplots(figsize=(8, 7))
-    ax.set_title("ROC Curves — BrainTumorAI (One-vs-Rest)", fontsize=13, fontweight="bold")
+    ax.set_title("ROC Curves - BrainTumorAI (One-vs-Rest)", fontsize=13, fontweight="bold")
 
     auc_scores: Dict[str, float] = {}
     colors = ["steelblue", "tomato", "seagreen", "darkorange"]
@@ -225,7 +225,7 @@ def plot_roc_curves(
     if save:
         path = os.path.join(_figures_dir(), "roc_curves.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
-        print(f"[Evaluate] ROC curves → {path}")
+        print(f"[Evaluate] ROC curves -> {path}")
 
     plt.close(fig)
     return auc_scores
@@ -318,6 +318,6 @@ def evaluate_model(
         os.makedirs(train_cfg.reports_dir, exist_ok=True)
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2, ensure_ascii=False)
-        print(f"\n[Evaluate] Summary → {report_path}")
+        print(f"\n[Evaluate] Summary -> {report_path}")
 
     return summary

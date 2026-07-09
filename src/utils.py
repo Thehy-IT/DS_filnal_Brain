@@ -139,7 +139,7 @@ def save_history(history: Dict, save_path: str) -> None:
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
-    print(f"[utils] Training history saved → {save_path}")
+    print(f"[utils] Training history saved -> {save_path}")
 
 
 def load_history(save_path: str) -> Dict:

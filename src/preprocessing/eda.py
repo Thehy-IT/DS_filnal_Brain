@@ -428,7 +428,7 @@ def image_size_analysis(
 
     # Box plot: width distribution per class
     box_data = [all_widths[cls] for cls in classes]
-    bp = ax_box.boxplot(box_data, labels=classes, patch_artist=True, vert=True)
+    bp = ax_box.boxplot(box_data, tick_labels=classes, patch_artist=True, vert=True)
     for patch, color in zip(bp["boxes"], palette):
         patch.set_facecolor(color)
         patch.set_alpha(0.6)

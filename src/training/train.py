@@ -13,6 +13,7 @@ Improvements over v1 (all learned from DAKHDL's 02_HuanLuyen_Model.ipynb):
 """
 import argparse
 import os
+import time
 
 import torch
 import torch.nn as nn
@@ -84,6 +85,7 @@ def _run_epoch(
     optimizer: optim.Optimizer,
     device: torch.device,
     is_train: bool,
+    scaler: torch.cuda.amp.GradScaler = None,
 ) -> tuple:
     """Run one epoch (train or eval). Returns (avg_loss, accuracy)."""
     model.train(is_train)
@@ -101,12 +103,19 @@ def _run_epoch(
             if is_train:
                 optimizer.zero_grad()
 
-            outputs = model(images)
-            loss = criterion(outputs, labels)
+            # Automatic Mixed Precision
+            with torch.cuda.amp.autocast(enabled=(device.type == 'cuda' and scaler is not None)):
+                outputs = model(images)
+                loss = criterion(outputs, labels)
 
             if is_train:
-                loss.backward()
-                optimizer.step()
+                if scaler is not None and device.type == 'cuda':
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    optimizer.step()
 
             total_loss += loss.item() * images.size(0)
             preds = outputs.argmax(dim=1)
@@ -132,6 +141,7 @@ def _train_phase(
     phase_name: str,
     save_dir: str,
     model_name: str,
+    scaler: torch.cuda.amp.GradScaler = None,
 ) -> bool:
     """
     Run training for `num_epochs` with early stopping.
@@ -147,10 +157,10 @@ def _train_phase(
 
     for epoch in range(num_epochs):
         train_loss, train_acc, _, _ = _run_epoch(
-            model, train_loader, criterion, optimizer, device, is_train=True
+            model, train_loader, criterion, optimizer, device, is_train=True, scaler=scaler
         )
         val_loss, val_acc, val_preds, val_labels = _run_epoch(
-            model, val_loader, criterion, optimizer, device, is_train=False
+            model, val_loader, criterion, optimizer, device, is_train=False, scaler=scaler
         )
 
         # Scheduler step (on val_acc)
@@ -175,12 +185,17 @@ def _train_phase(
             best_val_acc = val_acc
             save_path = os.path.join(save_dir, f"{model_name}_best.pth")
             torch.save(model.state_dict(), save_path)
-            print(f"  ✓ Checkpoint saved  (val_acc={val_acc:.4f}) → {save_path}")
+            print(f"  [Saved] Checkpoint saved  (val_acc={val_acc:.4f}) -> {save_path}")
 
         # Early stopping check
         if early_stopping.step(val_acc, model):
             stopped_early = True
             break
+
+        # Cooldown sleep to prevent overheating
+        if epoch < num_epochs - 1:
+            print(f"  [Safety] Pausing for 5 seconds to cool down hardware...")
+            time.sleep(5)
 
     return stopped_early, val_preds, val_labels
 
@@ -247,6 +262,9 @@ def train_model(
     # ----- Loss with class weights (address imbalance) -----
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
+    # ----- GradScaler for Mixed Precision -----
+    scaler = torch.cuda.amp.GradScaler(enabled=(device.type == "cuda"))
+
     # ----- Training history -----
     history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
@@ -283,6 +301,7 @@ def train_model(
             device, train_cfg.phase1_epochs, history,
             phase_name="Phase 1 — Classifier Head",
             save_dir=save_dir, model_name=model_name,
+            scaler=scaler,
         )
     else:
         print(f"[Phase 1] Skipped for model {model_name} (if no clear backbone to freeze) — please verify implementation if needed")
@@ -316,6 +335,7 @@ def train_model(
         device, train_cfg.phase2_epochs, history,
         phase_name="Phase 2 — Full Fine-Tuning",
         save_dir=save_dir, model_name=model_name,
+        scaler=scaler,
     )
 
     # Restore best weights found across both phases
@@ -341,7 +361,7 @@ def train_model(
         train_cfg.reports_dir, "training_history.json"
     )
     save_history(history, history_path)
-    print(f"\nTraining history → {history_path}")
+    print(f"\nTraining history -> {history_path}")
 
 
 # ---------------------------------------------------------------------------

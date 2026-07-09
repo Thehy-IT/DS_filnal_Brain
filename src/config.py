@@ -45,7 +45,7 @@ class DataConfig:
     # Kích thước ảnh đầu vào cho mạng CNN (Mặc định 224x224 cho EfficientNet và DenseNet)
     image_size: int = 224            
     # Số luồng (workers) load dữ liệu song song. Nếu chạy trên Windows bị lỗi, hãy đổi thành 0.
-    num_workers: int = 4             
+    num_workers: int = 0             
 
 
 # ---------------------------------------------------------------------------

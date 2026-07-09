@@ -64,17 +64,17 @@ def client():
 
     mock_pred = _make_mock_predictor()
 
-    with mock.patch.object(backend_module, "_predictor", mock_pred):
+    with mock.patch(
+        "app.backend.main.generate_gradcam",
+        return_value=(None, Image.new("RGB", (224, 224))),
+    ):
         with mock.patch(
-            "app.backend.main.generate_gradcam",
-            return_value=(None, Image.new("RGB", (224, 224))),
+            "app.backend.main.overlay_to_base64",
+            return_value="FAKEB64",
         ):
-            with mock.patch(
-                "app.backend.main.overlay_to_base64",
-                return_value="FAKEB64",
-            ):
-                with TestClient(app) as c:
-                    yield c
+            with TestClient(app) as c:
+                backend_module._predictor = mock_pred
+                yield c
 
 
 @pytest.fixture
@@ -82,9 +82,9 @@ def client_no_model():
     """TestClient where no model is loaded (predictor = None)."""
     import app.backend.main as backend_module
 
-    with mock.patch.object(backend_module, "_predictor", None):
-        with TestClient(app) as c:
-            yield c
+    with TestClient(app) as c:
+        backend_module._predictor = None
+        yield c
 
 
 # ---------------------------------------------------------------------------

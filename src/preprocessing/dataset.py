@@ -204,7 +204,7 @@ def split_dataset(
         stratify=all_labels,
     )
     print(
-        f"[Dataset] Split → train: {len(train_idx)} | val: {len(val_idx)} "
+        f"[Dataset] Split -> train: {len(train_idx)} | val: {len(val_idx)} "
         f"(stratified, seed={seed})"
     )
 
