@@ -42,8 +42,9 @@ export default function TestSection() {
       const formData = new FormData();
       formData.append("file", file);
 
-      // Gọi đến FastAPI backend (đảm bảo backend đang chạy trên port 8000)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/predict";
+      // Dùng Next.js proxy /api/* → FastAPI backend (tránh CORS hoàn toàn)
+      // Hoạt động đúng dù mở qua localhost hay IP mạng LAN
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api/predict";
       const res = await fetch(apiUrl, {
         method: "POST",
         body: formData,

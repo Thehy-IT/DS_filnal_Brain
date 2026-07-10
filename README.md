@@ -186,7 +186,7 @@ data/Training/
 | Model                                          | Accuracy | Macro F1 |
 | ---------------------------------------------- | -------- | -------- |
 | **EfficientNetB0** (2-phase fine-tuning) | ~95–97% | ~0.95    |
-| **DenseNet121** (Đối chiếu)                    | ~94–96% | ~0.94    |
+| **DenseNet121** (Đối chiếu)           | ~94–96% | ~0.94    |
 
 ---
 

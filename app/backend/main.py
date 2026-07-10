@@ -84,7 +84,9 @@ app = FastAPI(
 
 # CORS — restrict to known origins in production
 _allowed_origins: List[str] = os.environ.get(
-    "ALLOWED_ORIGINS", "http://localhost:8501,http://localhost:3000"
+    "ALLOWED_ORIGINS",
+    "http://localhost:8501,http://localhost:3000,"
+    "http://192.168.1.8:3000,http://192.168.1.8:8501",
 ).split(",")
 
 app.add_middleware(
