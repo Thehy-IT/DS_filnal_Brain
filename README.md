@@ -76,7 +76,7 @@ npm install
 ### 3. Khám phá & Tiền xử lý dữ liệu (EDA)
 
 ```python
-1# Chạy trong môi trường Python hoặc Jupyter Notebook
+# Chạy trong môi trường Python hoặc Jupyter Notebook
 from src.preprocessing.eda import full_eda_report
 full_eda_report(data_dir="data/Training")
 # Báo cáo biểu đồ sẽ lưu tại: reports/figures/eda/
@@ -107,7 +107,6 @@ Cần mở 2 Terminal riêng biệt:
 **Terminal 1 — Backend (FastAPI)**
 
 ```bash
-# Đứng tại thư mục gốc của dự án, kích hoạt venv (nếu chưa)
 uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -116,7 +115,6 @@ uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
 ```bash
 cd app/frontend
 npm run dev
-# Mở trình duyệt tại: http://localhost:3000
 ```
 
 ---
