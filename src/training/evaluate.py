@@ -15,7 +15,7 @@ import os
 from typing import Dict, List, Optional
 
 import matplotlib
-matplotlib.use("Agg")  # Non-interactive backend — safe in server/notebook contexts
+matplotlib.use("Agg")  # Backend không cần màn hình — an toàn trong server/notebook
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -35,7 +35,7 @@ from src.utils import load_history
 
 
 # ---------------------------------------------------------------------------
-# Directory helpers
+# Helper nội bộ — trả về đường dẫn thư mục lưu hình ảnh, tự tạo nếu chưa có
 # ---------------------------------------------------------------------------
 
 def _figures_dir() -> str:
@@ -45,7 +45,7 @@ def _figures_dir() -> str:
 
 
 # ---------------------------------------------------------------------------
-# 1. Confusion Matrix
+# 1. Confusion Matrix — ma trận nhầm lẫn, hiển thị số lần đúng/sai mỗi lớp
 # ---------------------------------------------------------------------------
 
 def plot_confusion_matrix(
@@ -55,21 +55,24 @@ def plot_confusion_matrix(
     save: bool = True,
 ) -> np.ndarray:
     """
-    Plot and optionally save a normalised confusion matrix heatmap.
+    Vẽ và lưu confusion matrix dạng heatmap (cả số đếm lẫn tỷ lệ phần trăm).
 
     Args:
-        y_true:      Ground-truth integer labels.
-        y_pred:      Predicted integer labels.
-        class_names: Display labels for axes.
-        save:        If True, write PNG to reports/figures/.
+        y_true:      Nhãn thực tế (ground truth).
+        y_pred:      Nhãn dự đoán của model.
+        class_names: Tên các lớp để hiển thị trên trục.
+        save:        Nếu True, lưu file PNG vào reports/figures/.
 
     Returns:
-        cm: Raw (unnormalised) confusion matrix as numpy array.
+        cm: Ma trận nhầm lẫn thô (chưa normalize) dạng numpy array.
     """
     class_names = class_names or data_cfg.class_names
+    # Tính confusion matrix thô (số lượng)
     cm = confusion_matrix(y_true, y_pred)
+    # Normalize theo hàng: mỗi ô = tỷ lệ % so với tổng lớp thực tế
     cm_norm = cm.astype("float") / cm.sum(axis=1, keepdims=True)
 
+    # Vẽ 2 subplot: bên trái số đếm, bên phải tỷ lệ %
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     fig.suptitle("Confusion Matrix — BrainTumorAI", fontsize=14, fontweight="bold")
 
@@ -81,9 +84,9 @@ def plot_confusion_matrix(
     ):
         sns.heatmap(
             data,
-            annot=True,
+            annot=True,      # Hiển thị số trong từng ô
             fmt=fmt,
-            cmap="Blues",
+            cmap="Blues",    # Màu xanh đậm = giá trị cao
             xticklabels=class_names,
             yticklabels=class_names,
             ax=ax,
@@ -105,7 +108,7 @@ def plot_confusion_matrix(
 
 
 # ---------------------------------------------------------------------------
-# 2. Training History Curves
+# 2. Training History Curves — biểu đồ loss và accuracy qua từng epoch
 # ---------------------------------------------------------------------------
 
 def plot_training_history(
@@ -114,15 +117,14 @@ def plot_training_history(
     save: bool = True,
 ) -> None:
     """
-    Plot training & validation loss and accuracy curves.
-
-    Mirrors DAKHDL's training history visualisation.
+    Vẽ đường cong loss và accuracy của tập train và validation theo epoch.
 
     Args:
-        history:      Dict with keys train_loss/val_loss/train_acc/val_acc.
-        history_path: If history is None, load from this JSON path.
-        save:         If True, write PNG to reports/figures/.
+        history:      Dict chứa train_loss/val_loss/train_acc/val_acc.
+        history_path: Nếu history=None, tải từ file JSON này.
+        save:         Nếu True, lưu PNG vào reports/figures/.
     """
+    # Cho phép truyền dict trực tiếp hoặc đọc từ file JSON
     if history is None:
         if history_path is None:
             history_path = os.path.join(train_cfg.reports_dir, "training_history.json")
@@ -133,7 +135,7 @@ def plot_training_history(
     fig, (ax_loss, ax_acc) = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle("Training History — BrainTumorAI", fontsize=14, fontweight="bold")
 
-    # --- Loss ---
+    # Biểu đồ Loss: xanh = train, đỏ = validation
     ax_loss.plot(epochs, history["train_loss"], "b-o", markersize=4, label="Train Loss")
     ax_loss.plot(epochs, history["val_loss"], "r-o", markersize=4, label="Val Loss")
     ax_loss.set_title("Loss per Epoch")
@@ -142,7 +144,7 @@ def plot_training_history(
     ax_loss.legend()
     ax_loss.grid(True, alpha=0.3)
 
-    # --- Accuracy ---
+    # Biểu đồ Accuracy: xanh = train, đỏ = validation
     ax_acc.plot(epochs, history["train_acc"], "b-o", markersize=4, label="Train Acc")
     ax_acc.plot(epochs, history["val_acc"], "r-o", markersize=4, label="Val Acc")
     ax_acc.set_title("Accuracy per Epoch")
@@ -152,7 +154,7 @@ def plot_training_history(
     ax_acc.legend()
     ax_acc.grid(True, alpha=0.3)
 
-    # Mark best val_acc epoch
+    # Đánh dấu epoch có val_acc tốt nhất bằng đường thẳng xanh lá
     best_epoch = int(np.argmax(history["val_acc"])) + 1
     best_acc = max(history["val_acc"])
     ax_acc.axvline(x=best_epoch, color="green", linestyle="--", alpha=0.6)
@@ -175,7 +177,7 @@ def plot_training_history(
 
 
 # ---------------------------------------------------------------------------
-# 3. ROC-AUC Curves (one-vs-rest per class)
+# 3. ROC-AUC Curves — đường cong ROC cho từng lớp theo chiến lược one-vs-rest
 # ---------------------------------------------------------------------------
 
 def plot_roc_curves(
@@ -185,21 +187,21 @@ def plot_roc_curves(
     save: bool = True,
 ) -> Dict[str, float]:
     """
-    Plot ROC curves and compute AUC for each class (one-vs-rest).
+    Vẽ đường cong ROC và tính AUC cho từng lớp (one-vs-rest).
 
     Args:
-        y_true:      Ground-truth integer labels.
-        y_prob:      Softmax probabilities, shape (N, num_classes).
-        class_names: Display names for each class.
-        save:        If True, write PNG to reports/figures/.
+        y_true:      Nhãn thực tế.
+        y_prob:      Xác suất softmax, shape (N, num_classes).
+        class_names: Tên các lớp.
+        save:        Nếu True, lưu PNG.
 
     Returns:
-        Dict mapping class name → AUC score.
+        Dict ánh xạ tên lớp -> điểm AUC.
     """
     class_names = class_names or data_cfg.class_names
     num_classes = len(class_names)
 
-    # Binarise ground truth for one-vs-rest
+    # Chuyển nhãn sang dạng one-hot để tính ROC one-vs-rest
     y_bin = label_binarize(y_true, classes=list(range(num_classes)))
 
     fig, ax = plt.subplots(figsize=(8, 7))
@@ -209,11 +211,13 @@ def plot_roc_curves(
     colors = ["steelblue", "tomato", "seagreen", "darkorange"]
 
     for i, (cls, color) in enumerate(zip(class_names, colors)):
+        # Tính FPR/TPR cho từng lớp
         fpr, tpr, _ = roc_curve(y_bin[:, i], y_prob[:, i])
         roc_auc = auc(fpr, tpr)
         auc_scores[cls] = roc_auc
         ax.plot(fpr, tpr, color=color, lw=2, label=f"{cls}  (AUC = {roc_auc:.3f})")
 
+    # Đường chéo = random classifier (AUC = 0.5), dùng làm baseline
     ax.plot([0, 1], [0, 1], "k--", lw=1, label="Random classifier")
     ax.set_xlabel("False Positive Rate")
     ax.set_ylabel("True Positive Rate")
@@ -232,7 +236,7 @@ def plot_roc_curves(
 
 
 # ---------------------------------------------------------------------------
-# 4. Macro evaluation summary
+# 4. evaluate_model — hàm đánh giá tổng hợp, gọi tất cả các bước trên
 # ---------------------------------------------------------------------------
 
 def evaluate_model(
@@ -243,43 +247,47 @@ def evaluate_model(
     save_report: bool = True,
 ) -> Dict:
     """
-    Run full evaluation on a DataLoader and return a metrics summary dict.
+    Chạy đánh giá đầy đủ trên DataLoader và trả về dict tổng hợp các chỉ số.
 
-    Performs:
-      - Confusion matrix plot
-      - Per-class classification report (precision / recall / F1)
-      - ROC-AUC per class
-      - JSON summary saved to reports/
+    Bao gồm:
+      - Confusion matrix
+      - Classification report (precision / recall / F1)
+      - ROC-AUC từng lớp
+      - Lưu JSON tóm tắt vào reports/
 
     Args:
-        model:       Trained PyTorch model (already on device, in eval mode).
-        data_loader: DataLoader for the evaluation set.
+        model:       Model đã huấn luyện (đang ở eval mode, đúng device).
+        data_loader: DataLoader của tập đánh giá.
         device:      torch.device.
-        class_names: Override class list.
-        save_report: If True, persist JSON and figures.
+        class_names: Override danh sách lớp.
+        save_report: Nếu True, lưu JSON và các hình ảnh.
 
     Returns:
-        Dict with keys: accuracy, macro_f1, auc_scores, report_str.
+        Dict với các key: accuracy, macro_f1, auc_scores, report_str.
     """
     class_names = class_names or data_cfg.class_names
-    model.eval()
+    model.eval()  # Tắt dropout và batch norm training mode
 
     all_preds, all_labels, all_probs = [], [], []
 
+    # Chạy inference trên toàn bộ tập đánh giá, không tính gradient
     with torch.no_grad():
         for images, labels in data_loader:
             images = images.to(device)
             outputs = model(images)
+            # Chuyển logits sang xác suất bằng softmax
             probs = torch.softmax(outputs, dim=1)
+            # Lấy class có xác suất cao nhất
             preds = probs.argmax(dim=1)
 
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.numpy())
             all_probs.extend(probs.cpu().numpy())
 
+    # Chuyển danh sách xác suất sang numpy array 2D (N, num_classes)
     all_probs = np.array(all_probs)
 
-    # --- Classification report ---
+    # In classification report: precision, recall, F1 cho từng lớp
     report_str = classification_report(
         all_labels, all_preds, target_names=class_names
     )
@@ -288,23 +296,25 @@ def evaluate_model(
     print("="*60)
     print(report_str)
 
-    # --- Confusion matrix ---
+    # Vẽ confusion matrix
     plot_confusion_matrix(all_labels, all_preds, class_names=class_names, save=save_report)
 
-    # --- ROC-AUC ---
+    # Vẽ và tính ROC-AUC từng lớp
     auc_scores = plot_roc_curves(
         all_labels, all_probs, class_names=class_names, save=save_report
     )
+    # Macro AUC = trung bình AUC của 4 lớp
     macro_auc = float(np.mean(list(auc_scores.values())))
     print(f"Macro ROC-AUC: {macro_auc:.4f}")
     for cls, s in auc_scores.items():
         print(f"  {cls:>12}: AUC = {s:.4f}")
 
-    # --- Accuracy ---
+    # Tính accuracy tổng và macro F1
     from sklearn.metrics import accuracy_score, f1_score
     acc = accuracy_score(all_labels, all_preds)
     macro_f1 = f1_score(all_labels, all_preds, average="macro")
 
+    # Đóng gói tất cả chỉ số vào dict
     summary = {
         "accuracy": round(acc, 6),
         "macro_f1": round(macro_f1, 6),
@@ -313,6 +323,7 @@ def evaluate_model(
         "classification_report": report_str,
     }
 
+    # Lưu tóm tắt ra JSON để tham khảo sau
     if save_report:
         report_path = os.path.join(train_cfg.reports_dir, "evaluation_summary.json")
         os.makedirs(train_cfg.reports_dir, exist_ok=True)

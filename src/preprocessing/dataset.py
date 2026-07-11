@@ -21,30 +21,31 @@ from src.config import data_cfg, SEED
 
 
 # ---------------------------------------------------------------------------
-# Dataset
+# BrainTumorDataset — Dataset PyTorch tùy chỉnh cho ảnh MRI u não
 # ---------------------------------------------------------------------------
 
 class BrainTumorDataset(Dataset):
     """
-    PyTorch Dataset for Brain Tumor MRI Images.
+    PyTorch Dataset cho ảnh MRI u não.
 
-    Expects data organized in class sub-folders:
+    Yêu cầu cấu trúc thư mục theo lớp:
         root_dir/
             glioma/
             meningioma/
             notumor/
             pituitary/
 
-    Attributes:
-        root_dir (str):            Resolved absolute path to data root.
-        transform (callable):      Transform pipeline applied to each image.
-        classes (List[str]):       Ordered list of class names.
-        class_to_idx (dict):       Maps class name → integer index.
-        image_paths (List[str]):   Absolute paths to every image file.
-        labels (List[int]):        Integer label for each image.
-        class_weights (Tensor):    Inverse-frequency weights for imbalance.
+    Thuộc tính:
+        root_dir (str):            Đường dẫn tuyệt đối đến thư mục gốc.
+        transform (callable):      Pipeline biến đổi ảnh.
+        classes (List[str]):       Danh sách tên lớp theo thứ tự.
+        class_to_idx (dict):       Ánh xạ tên lớp -> index số nguyên.
+        image_paths (List[str]):   Đường dẫn tuyệt đối đến từng ảnh.
+        labels (List[int]):        Nhãn số nguyên của từng ảnh.
+        class_weights (Tensor):    Trọng số nghịch tần số chống mất cân bằng.
     """
 
+    # Chỉ chấp nhận các định dạng ảnh phổ biến
     VALID_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 
     def __init__(
@@ -55,27 +56,30 @@ class BrainTumorDataset(Dataset):
     ) -> None:
         """
         Args:
-            root_dir:     Path to directory containing class sub-folders.
-            transform:    Optional torchvision / albumentations transform.
-            class_names:  Override default class list (default from config).
+            root_dir:     Đường dẫn thư mục chứa các thư mục con theo lớp.
+            transform:    Transform tùy chọn (torchvision hoặc albumentations).
+            class_names:  Override danh sách lớp (mặc định từ config).
         """
         self.root_dir = os.path.abspath(root_dir)
         self.transform = transform
         self.classes: List[str] = class_names or data_cfg.class_names
+        # Tạo mapping tên lớp -> số nguyên: {"glioma": 0, "meningioma": 1, ...}
         self.class_to_idx: dict = {c: i for i, c in enumerate(self.classes)}
 
         self.image_paths: List[str] = []
         self.labels: List[int] = []
 
+        # Xây dựng index ảnh và tính trọng số lớp ngay khi khởi tạo
         self._load_index()
         self._compute_class_weights()
 
     # ------------------------------------------------------------------
-    # Private helpers
+    # Hàm nội bộ
     # ------------------------------------------------------------------
 
     def _load_index(self) -> None:
-        """Walk root_dir and build image_paths + labels index."""
+        """Duyệt root_dir và xây dựng danh sách đường dẫn ảnh + nhãn."""
+        # Kiểm tra thư mục gốc tồn tại trước khi làm bất cứ điều gì
         if not os.path.isdir(self.root_dir):
             raise FileNotFoundError(
                 f"[BrainTumorDataset] Directory not found: {self.root_dir}\n"
@@ -86,10 +90,12 @@ class BrainTumorDataset(Dataset):
         for cls_name in self.classes:
             cls_dir = os.path.join(self.root_dir, cls_name)
             if not os.path.isdir(cls_dir):
+                # Ghi nhận lớp bị thiếu thư mục, không crash ngay
                 missing_classes.append(cls_name)
                 continue
 
             found = 0
+            # Sắp xếp để đảm bảo thứ tự nhất quán giữa các lần chạy
             for fname in sorted(os.listdir(cls_dir)):
                 ext = os.path.splitext(fname)[1].lower()
                 if ext in self.VALID_EXTENSIONS:
@@ -101,7 +107,7 @@ class BrainTumorDataset(Dataset):
 
         if missing_classes:
             print(
-                f"[Dataset] WARNING — classes not found in '{self.root_dir}': "
+                f"[Dataset] WARNING - classes not found in '{self.root_dir}': "
                 f"{missing_classes}"
             )
 
@@ -114,21 +120,23 @@ class BrainTumorDataset(Dataset):
         print(f"[Dataset] Total images loaded: {total}")
 
     def _compute_class_weights(self) -> None:
-        """Inverse-frequency weights: weight_c = N / (C * count_c)."""
+        """Tính trọng số nghịch tần số: weight_c = N / (C * count_c)."""
         labels_np = np.array(self.labels)
         total = len(labels_np)
         num_classes = len(self.classes)
         weights = []
         for c in range(num_classes):
             count = int(np.sum(labels_np == c))
+            # Tránh chia 0; lớp không có ảnh được gán trọng số 0
             weights.append(total / (num_classes * count) if count > 0 else 0.0)
         self.class_weights = torch.tensor(weights, dtype=torch.float32)
 
     # ------------------------------------------------------------------
-    # PyTorch Dataset interface
+    # Giao diện PyTorch Dataset (bắt buộc phải implement)
     # ------------------------------------------------------------------
 
     def __len__(self) -> int:
+        # Trả về tổng số ảnh trong dataset
         return len(self.image_paths)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, int]:
@@ -136,11 +144,11 @@ class BrainTumorDataset(Dataset):
         label = self.labels[idx]
 
         try:
+            # Luôn convert sang RGB để đảm bảo 3 kênh màu (tránh ảnh grayscale hoặc RGBA)
             image = Image.open(img_path).convert("RGB")
         except Exception as exc:
-            # Return a blank tensor to avoid crashing the DataLoader;
-            # a warning is printed so problematic files can be removed.
-            print(f"[Dataset] WARNING — could not open image {img_path}: {exc}")
+            # Ảnh bị hỏng: trả về ảnh trắng thay vì crash DataLoader
+            print(f"[Dataset] WARNING - could not open image {img_path}: {exc}")
             image = Image.new("RGB", (data_cfg.image_size, data_cfg.image_size))
 
         if self.transform:
@@ -156,7 +164,7 @@ class BrainTumorDataset(Dataset):
 
 
 # ---------------------------------------------------------------------------
-# Stratified split helper
+# split_dataset — chia tập train/val với chiến lược stratified (đồng đều lớp)
 # ---------------------------------------------------------------------------
 
 def split_dataset(
@@ -167,49 +175,50 @@ def split_dataset(
     seed: int = SEED,
 ) -> Tuple[Dataset, Dataset]:
     """
-    Create stratified train / validation subsets with SEPARATE transforms.
+    Tạo tập train / validation riêng biệt với transform TACH BIET nhau.
 
-    This function fixes a critical bug present in the original train.py where
-    ``random_split`` was used and the validation transform was accidentally
-    applied to the shared underlying dataset, contaminating training samples.
+    Hàm này fix một bug nghiêm trọng trong phiên bản cũ: khi dùng random_split(),
+    cả train lẫn val dùng chung một Dataset object, nên transform val vô tình
+    bị áp dụng cho cả ảnh train (data contamination).
 
-    Strategy:
-      1. Build a full index-only dataset (no transform) to get labels.
-      2. Perform stratified split on indices using sklearn.
-      3. Return two independent Dataset objects — one with train_transform,
-         one with val_transform — so transforms are truly isolated.
+    Chiến lược:
+      1. Xây dựng dataset chỉ để lấy index và nhãn (không cần transform).
+      2. Chia stratified theo nhãn bằng sklearn.
+      3. Tạo 2 Dataset độc lập với transform riêng — train có augmentation, val thì không.
 
     Args:
-        train_dir:       Path to the training data directory.
-        train_transform: Transform pipeline for training (with augmentation).
-        val_transform:   Transform pipeline for validation (no augmentation).
-        val_split:       Fraction [0, 1] to use for validation. Default from config.
-        seed:            Random seed for reproducibility.
+        train_dir:       Đường dẫn thư mục dữ liệu training.
+        train_transform: Pipeline augmentation cho training.
+        val_transform:   Pipeline chuẩn hóa cho validation (không augment).
+        val_split:       Tỷ lệ [0, 1] dành cho validation. Mặc định từ config.
+        seed:            Random seed để kết quả lặp lại.
 
     Returns:
-        (train_subset, val_subset) — both are valid PyTorch Datasets.
+        (train_subset, val_subset) — cả 2 đều là PyTorch Dataset hợp lệ.
     """
     val_split = val_split if val_split is not None else data_cfg.val_split
 
-    # Step 1: Build index (no transform needed just for splitting)
+    # Bước 1: Tạo dataset tạm (không transform) chỉ để lấy nhãn
     index_ds = BrainTumorDataset(root_dir=train_dir, transform=None)
     all_indices = list(range(len(index_ds)))
     all_labels = index_ds.labels
 
-    # Step 2: Stratified split
+    # Bước 2: Stratified split — giữ tỷ lệ các lớp đồng đều ở cả train và val
     train_idx, val_idx = train_test_split(
         all_indices,
         test_size=val_split,
         random_state=seed,
-        stratify=all_labels,
+        stratify=all_labels,  # Quan trọng: stratify theo nhãn
     )
     print(
         f"[Dataset] Split -> train: {len(train_idx)} | val: {len(val_idx)} "
         f"(stratified, seed={seed})"
     )
 
-    # Step 3: Two independent datasets with separate transforms
+    # Bước 3: Tạo 2 Dataset độc lập với transform khác nhau
+    # train_ds dùng augmentation, val_ds chỉ resize + normalize
     train_ds = BrainTumorDataset(root_dir=train_dir, transform=train_transform)
     val_ds = BrainTumorDataset(root_dir=train_dir, transform=val_transform)
 
+    # Subset giới hạn mỗi dataset về đúng các index đã chia
     return Subset(train_ds, train_idx), Subset(val_ds, val_idx)
