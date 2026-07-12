@@ -40,7 +40,10 @@ BrainTumorAI/
 ├── data/
 │   ├── Training/         # Dữ liệu huấn luyện (4 thư mục lớp)
 │   └── Testing/          # Dữ liệu kiểm thử
-├── models/               # Nơi lưu các file checkpoint (.pth)
+├── docs/                 # Tài liệu hướng dẫn chạy dự án
+├── models/               # Nơi lưu các file checkpoint (.pth, .onnx)
+├── notebooks/            # Jupyter notebooks (EDA & Đánh giá mô hình)
+├── reports/              # Nơi lưu JSON metrics và Figures (biểu đồ)
 ├── src/
 │   ├── config.py         # Cấu hình tập trung toàn bộ dự án
 │   ├── utils.py          # Helper functions (seed, paths)
@@ -62,7 +65,16 @@ BrainTumorAI/
 
 ### 1. Cài đặt Backend (FastAPI & PyTorch)
 
-Yêu cầu: Python 3.9+# Tạo và kích hoạt môi trường ảo
+Yêu cầu: Python 3.9+
+
+```bash
+# Tạo và kích hoạt môi trường ảo
+python -m venv venv
+# Windows: venv\Scripts\activate | Mac/Linux: source venv/bin/activate
+
+# Cài đặt thư viện
+pip install -r requirements.txt
+```
 
 ### 2. Cài đặt Frontend (Next.js)
 
@@ -100,7 +112,15 @@ python src/training/train.py --model-name densenet --epochs 20
 
 > Trọng số tốt nhất sẽ tự động được lưu vào thư mục `models/`.
 
-### 5. Khởi động Hệ thống (Phục vụ Dự đoán)
+### 5. Đánh giá và Xuất mô hình (Tùy chọn)
+
+- **Đánh giá (Evaluation):** Khởi chạy `jupyter notebook` và chạy file `notebooks/02_Model_Compare_Evaluate_Visualize.ipynb` để vẽ Confusion Matrix và ROC-AUC.
+- **Xuất ONNX (Production):** Chuyển đổi trọng số sang ONNX để tăng tốc inference:
+```bash
+python src/inference/export_onnx.py --model-name efficientnet --pth-path models/efficientnet_best.pth --onnx-path models/efficientnet_best.onnx
+```
+
+### 6. Khởi động Hệ thống (Phục vụ Dự đoán)
 
 Cần mở 2 Terminal riêng biệt:
 
@@ -116,6 +136,14 @@ uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
 cd app/frontend
 npm run dev
 ```
+
+### 7. Khởi chạy bằng Docker (Siêu tốc)
+
+Nếu máy bạn đã cài Docker Desktop, bạn có thể bỏ qua toàn bộ các bước cài đặt trên. Chỉ cần 1 dòng lệnh duy nhất ở thư mục gốc:
+```bash
+docker-compose up -d --build
+```
+Hệ thống web sẽ lập tức chạy tại `http://localhost:3000`.
 
 ---
 
@@ -196,4 +224,4 @@ data/Training/
 
 **Tác giả**: Huỳnh Thế Hy
 **Email**: huynhthehy2005@gmail.com
-**Cập nhật lần cuối**: 2026-06-22 — Phiên bản 2.0.1
+**Cập nhật lần cuối**: 2026-07-12 — Phiên bản 2.1.0

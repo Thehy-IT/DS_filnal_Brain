@@ -7,7 +7,7 @@ pandas>=2.2.1
 scikit-learn>=1.4.1
 opencv-python>=4.9.0.80
 Pillow>=10.2.0
-albumentations>=1.4.1
+tqdm>=4.66.0
 
 # Explainable AI
 grad-cam>=1.5.0
@@ -23,8 +23,6 @@ python-multipart>=0.0.9
 pydantic>=2.6.3
 requests>=2.31.0
 
-# Frontend Web
-streamlit>=1.32.2
 
 # Config management
 python-dotenv>=1.0.1

@@ -1,3 +1,0 @@
-- đóng vai là 1 senior data science với 20 năm kinh nghiệm làm việc với dữ liệu thực tế hãy đánh giá cho tôi kết quả train của 2 model trong dự án cho tôi. và tạo 1 file đánh giá nằm trong thư mục @docs
-- thực hiện kiểm tra chuyên sâu file docker đã hoàn thiện hoàn toàn đúng với dự án chưa.
-- Thực hiện đóng vai là 1 senior kiểm thử chuyên ngành data science với 20 năm kinh nghiệm làm việc thực tế hãy kiểm trong toàn dự án cho tôi theo chuẩn kiến trúc bộ kiểm thử chuyên ngành data. Và báo cáo chi tiết độ hoàn thành của dự án này theo thang điểm 100.
