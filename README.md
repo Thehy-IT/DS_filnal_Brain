@@ -116,6 +116,7 @@ python src/training/train.py --model-name densenet --epochs 20
 
 - **Đánh giá (Evaluation):** Khởi chạy `jupyter notebook` và chạy file `notebooks/02_Model_Compare_Evaluate_Visualize.ipynb` để vẽ Confusion Matrix và ROC-AUC.
 - **Xuất ONNX (Production):** Chuyển đổi trọng số sang ONNX để tăng tốc inference:
+
 ```bash
 python src/inference/export_onnx.py --model-name efficientnet --pth-path models/efficientnet_best.pth --onnx-path models/efficientnet_best.onnx
 ```
@@ -140,9 +141,11 @@ npm run dev
 ### 7. Khởi chạy bằng Docker (Siêu tốc)
 
 Nếu máy bạn đã cài Docker Desktop, bạn có thể bỏ qua toàn bộ các bước cài đặt trên. Chỉ cần 1 dòng lệnh duy nhất ở thư mục gốc:
+
 ```bash
 docker-compose up -d --build
 ```
+
 Hệ thống web sẽ lập tức chạy tại `http://localhost:3000`.
 
 ---

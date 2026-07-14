@@ -1,0 +1,61 @@
+<mxfile host="65bd71144e">
+    <diagram id="flow_diagram" name="Data Flow Diagram">
+        <mxGraphModel dx="1491" dy="679" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="800" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="MRI" value="Ảnh MRI" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;spacingTop=5;fontFamily=Times New Roman;size=20;" parent="1" vertex="1">
+                    <mxGeometry x="614.5" y="18" width="116" height="61" as="geometry"/>
+                </mxCell>
+                <mxCell id="Preprocess" value="Tiền xử lý dữ liệu&#xa;(Data Preprocessing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;fontFamily=Times New Roman;" parent="1" vertex="1">
+                    <mxGeometry x="592.5" y="104.5" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="CNN" value="Mô hình CNN&#xa;(EfficientNetB0 / DenseNet121)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;fontFamily=Times New Roman;" parent="1" vertex="1">
+                    <mxGeometry x="568" y="222.5" width="209" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="Classification" value="(a) Phân loại khối u" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;fontFamily=Times New Roman;" parent="1" vertex="1">
+                    <mxGeometry x="711" y="339" width="150.5" height="62.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="GradCAM" value="(b) Grad-CAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;fontFamily=Times New Roman;" parent="1" vertex="1">
+                    <mxGeometry x="469" y="340" width="137.5" height="60.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="Result" value="Kết quả có thể giải thích&#xa;(Ảnh + Xác suất + Heatmap)" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=14;fontFamily=Times New Roman;" parent="1" vertex="1">
+                    <mxGeometry x="558" y="444" width="214" height="81" as="geometry"/>
+                </mxCell>
+                <mxCell id="Dashboard" value="Web Dashboard" style="shape=monitor;whiteSpace=wrap;html=1;fillColor=#bac8d3;strokeColor=#23445d;fontStyle=1;fontSize=14;fontFamily=Times New Roman;" parent="1" vertex="1">
+                    <mxGeometry x="585.5" y="568" width="159" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge1" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="MRI" target="Preprocess" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge2" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="Preprocess" target="CNN" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge3" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="CNN" target="Classification" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge4" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="CNN" target="GradCAM" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="Edge5" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="Classification" target="Result" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="799" y="468"/>
+                            <mxPoint x="684" y="468"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Edge6" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="GradCAM" target="Result" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="538" y="465"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="Edge7" value="" style="endArrow=classic;html=1;strokeWidth=2;rounded=1;fontFamily=Times New Roman;fontSize=14;edgeStyle=orthogonalEdgeStyle;" parent="1" source="Result" target="Dashboard" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
