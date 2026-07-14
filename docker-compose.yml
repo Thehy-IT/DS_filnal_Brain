@@ -15,8 +15,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: app/frontend/Dockerfile
+      context: ./app/frontend
+      dockerfile: Dockerfile
     container_name: braintumorai_frontend
     ports:
       - "3000:3000"
