@@ -4,8 +4,7 @@ export default function Footer() {
       © 2026 NeuroScan — Đồ án Khoa học dữ liệu: Phân loại khối u não trên ảnh
       MRI.
       <br />
-      Mô hình EfficientNetB0 · Chạy bằng TensorFlow.js · Chỉ dùng cho mục đích
-      tham khảo.
+      Hệ thống hỗ trợ chẩn đoán hình ảnh y tế · Chỉ dùng cho mục đích tham khảo.
     </footer>
   );
 }

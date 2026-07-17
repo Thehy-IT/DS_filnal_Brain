@@ -1,8 +1,8 @@
 const STATS = [
   { label: "Số nhóm chẩn đoán", value: "4" },
   { label: "Độ phân giải đầu vào", value: "224×224" },
-  { label: "Mô hình", value: "EfficientNetB0" },
-  { label: "Xử lý", value: "Ngay trên trình duyệt" },
+  { label: "Phương pháp giải thích", value: "Grad-CAM" },
+  { label: "Xử lý", value: "Tốc độ cao" },
 ];
 
 export default function Hero() {

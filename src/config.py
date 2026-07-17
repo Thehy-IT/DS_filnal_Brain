@@ -124,7 +124,7 @@ class InferenceConfig:
         )
     )
     # Tên mô hình sẽ load trong FastAPI (hãy đổi thành "densenet" nếu bạn muốn API dùng DenseNet121)
-    model_name: str = "efficientnet"
+    model_name: str = os.environ.get("MODEL_NAME", "efficientnet")
     
     # Cấu hình mạng cho API
     api_host: str = os.environ.get("API_HOST", "127.0.0.1")

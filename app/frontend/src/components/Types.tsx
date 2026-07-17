@@ -7,10 +7,10 @@ export default function Types() {
         Phạm vi nhận diện
       </div>
       <h2 className="mb-4 text-[1.9rem] font-extrabold">
-        4 nhóm mô hình phân loại
+        4 nhóm phân loại chẩn đoán
       </h2>
       <p className="mb-8 max-w-[780px] text-[1.05rem] text-muted">
-        Mô hình được huấn luyện để phân biệt bốn tình trạng phổ biến trên ảnh
+        Hệ thống được thiết kế để phân biệt bốn tình trạng phổ biến trên ảnh
         MRI.
       </p>
 
