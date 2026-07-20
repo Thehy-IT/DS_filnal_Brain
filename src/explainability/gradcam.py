@@ -110,8 +110,9 @@ def generate_gradcam(
     if target_layer is None:
         target_layer = _get_target_layer(model)
 
-    # Bước 2: Chuẩn bị tensor đầu vào — thêm batch dimension (1, C, H, W)
-    input_tensor = transform(image).unsqueeze(0)
+    # Bước 2: Chuẩn bị tensor đầu vào trên đúng device của model (CPU/GPU) — (1, C, H, W)
+    device = next(model.parameters()).device
+    input_tensor = transform(image).unsqueeze(0).to(device)
 
     # Bước 3: Khởi tạo GradCAM với layer target
     cam = GradCAM(model=model, target_layers=[target_layer])

@@ -42,15 +42,28 @@ def _make_image_bytes(size=(64, 64), fmt="JPEG") -> bytes:
 def _make_mock_predictor():
     """Return a MagicMock that behaves like a loaded TumorPredictor."""
     pred = mock.MagicMock()
+    # [v1] predict() — vẫn giữ để backward-compat với test khác nếu có
     pred.predict.return_value = {
         "class_name": "glioma",
         "class_idx": 0,
         "confidence": 0.92,
         "probabilities": [0.92, 0.04, 0.02, 0.02],
+        "method": "single",
+    }
+    # [v2 — Giai đoạn 3] predict_with_tta() — API /predict hiện dùng method này
+    # Các trường phải khớp với PredictionResult schema trong main.py
+    pred.predict_with_tta.return_value = {
+        "class_name": "glioma",
+        "class_idx": 0,
+        "confidence": 0.92,
+        "probabilities": [0.92, 0.04, 0.02, 0.02],
+        "method": "tta_5",
+        "tta_n": 5,
     }
     # model.model.conv_head exists (needed by gradcam auto-detect)
     pred.model.model.conv_head = mock.MagicMock()
     return pred
+
 
 
 # ---------------------------------------------------------------------------
@@ -154,10 +167,17 @@ class TestPredictEndpoint:
             files={"file": ("mri.jpg", img_bytes, "image/jpeg")},
         )
         data = resp.json()
+        # Các trường cũ
         assert "class_name" in data
         assert "confidence" in data
         assert "probabilities" in data
         assert "heatmap_base64" in data
+        # [v2 — Giai đoạn 3] Các trường mới từ TTA
+        assert "tta_method" in data
+        assert "tta_n" in data
+        assert isinstance(data["tta_method"], str)
+        assert isinstance(data["tta_n"], int)
+
 
     def test_predict_probabilities_has_4_classes(self, client):
         img_bytes = _make_image_bytes()

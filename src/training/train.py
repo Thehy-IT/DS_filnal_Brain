@@ -263,7 +263,12 @@ def train_model(
     )
 
     # Lấy class weights từ dataset gốc (truy cập qua .dataset vì là Subset)
-    class_weights = train_ds.dataset.class_weights.to(device)
+    class_weights = train_ds.dataset.class_weights.clone().to(device)
+    
+    # [v2.2] Tăng trọng số thủ công cho Glioma (index 0) để giảm lỗi bỏ sót (Recall thấp)
+    print(f"\n[Train] Original class weights: {class_weights.cpu().numpy()}")
+    class_weights[0] *= 1.5
+    print(f"[Train] Adjusted class weights (Glioma x1.5): {class_weights.cpu().numpy()}")
 
     # DataLoader training: shuffle=True để tránh model học thứ tự ảnh
     train_loader = DataLoader(
@@ -282,7 +287,12 @@ def train_model(
     model = model.to(device)
 
     # Hàm loss với trọng số lớp — giúp model không bỏ qua các lớp thiểu số
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    # [v2] Thêm label_smoothing=0.1: làm mềm nhãn cứng để model bớt "chắc chắn thái quá"
+    # Ảnh hưởng: thay vì target=[0,0,1,0], model học target=[0.025,0.025,0.925,0.025]
+    criterion = nn.CrossEntropyLoss(
+        weight=class_weights,
+        label_smoothing=train_cfg.label_smoothing,
+    )
 
     # GradScaler: kết hợp với autocast để dùng AMP, tăng tốc training trên GPU
     scaler = torch.cuda.amp.GradScaler(enabled=(device.type == "cuda"))

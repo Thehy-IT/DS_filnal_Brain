@@ -1,55 +1,69 @@
-# BrainTumorAI v2.0
+# BrainTumorAI v2.1 (Anti-Domain-Shift & High-Generalization Edition)
 
-**Hệ thống phát hiện và giải thích khối u não trên ảnh MRI sử dụng PyTorch (EfficientNetB0), Explainable AI (Grad-CAM), FastAPI và Next.js**
+**Hệ thống phân loại khối u não trên ảnh MRI toàn diện sử dụng PyTorch (EfficientNetB0 / DenseNet121), Explainable AI (Grad-CAM), Test-Time Augmentation (TTA), FastAPI và Next.js**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.2-orange.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.2%2B-orange.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688.svg)
 
 ---
 
-## Giới thiệu dự án
+## 📌 Tiến độ & Cải tiến nổi bật (Phiên bản v2.1)
 
-Dự án **BrainTumorAI** là một hệ thống phân loại ảnh MRI não thành **4 lớp**, đi kèm với bản đồ giải thích (Heatmap) giúp bác sĩ/người dùng hiểu được quyết định của AI.
+Sau khi kiểm thử thực tế với hình ảnh MRI bên ngoài (Out-of-Distribution / External Data), hệ thống đã được phân tích chuyên sâu và nâng cấp toàn bộ pipeline để **khắc phục hiện tượng Domain Shift (lệch phân phối dữ liệu)** và chống suy giảm hiệu năng khi dự đoán ảnh ngoài tập dữ liệu mẫu:
 
-| Lớp                 | Mô tả                                                        |
-| -------------------- | -------------------------------------------------------------- |
-| **Glioma**     | U thần kinh đệm — phát sinh từ tế bào thần kinh đệm |
-| **Meningioma** | U màng não — thường lành tính, phát triển chậm       |
-| **Pituitary**  | U tuyến yên — có thể gây rối loạn hormone              |
-| **No Tumor**   | Não bình thường — lớp đối chứng âm tính             |
-
-**Điểm nhấn công nghệ:**
-
-- **Mô hình**: PyTorch + `timm` (EfficientNetB0 làm mặc định) hoặc DenseNet121 (đối chiếu chuyên sâu y tế).
-- **Explainable AI (XAI)**: Tích hợp **Grad-CAM** làm nổi bật các khu vực quan trọng quyết định dự đoán.
-- **Backend API**: Xây dựng bằng FastAPI, xử lý song song, trả về xác suất và ảnh Grad-CAM Base64.
-- **Frontend**: Giao diện web hiện đại xây dựng trên nền tảng **Next.js (App Router)** và **Tailwind CSS**.
+1. **Phân tích Overfitting & Domain Shift**:
+   - Khoảng cách giữa Train Acc (99.75%) và Validation Acc (99.11%) chỉ là **0.64%** (Val Loss không tăng), khẳng định mô hình **không bị overfitting thuần túy** trên tập nội bộ.
+   - Nguyên nhân dự đoán sai ảnh bên ngoài là do **Domain Shift** (khác biệt thiết bị MRI, độ phân giải, độ sáng/tương phản giữa các cơ sở y tế).
+2. **Nâng cấp Data Augmentation (Giai đoạn 1)**:
+   - Thêm `GaussianBlur` (30% xác suất) mô phỏng ảnh MRI độ phân giải thấp.
+   - Thêm `RandomGrayscale` (10% xác suất) và `RandomPerspective` (20% xác suất, distortion=0.1) mô phỏng khác biệt thiết bị và góc chụp.
+   - Mở rộng góc xoay (`RandomRotation` 20° → 30°), độ sáng/tương phản (`ColorJitter` 0.2 → 0.3), zoom (`RandomAffine` scale 0.85–1.15) và tỉ lệ che đen (`RandomErasing` 10% → 20%).
+3. **Tăng cường Chống Học Vẹt (Giai đoạn 2)**:
+   - Thêm **Classifier Head Dropout (`p=0.3`)** trước lớp Linear của EfficientNetB0 và DenseNet121.
+   - Tích hợp **Label Smoothing (`label_smoothing=0.1`)** trong `CrossEntropyLoss` giúp giảm overconfidence (sự tự tin thái quá của model khi gặp ảnh lạ).
+   - Tăng penalty `weight_decay` từ `1e-4` lên `1e-3`.
+4. **Test-Time Augmentation - TTA (Giai đoạn 3)**:
+   - Tích hợp phương thức `predict_with_tta()` chạy **5 biến thể ảnh** (Gốc, Lật ngang, Xoay ±10°, Brightness/Contrast nhẹ, Zoom nhẹ) và tính trung bình xác suất (Mean Ensemble) trước khi đưa ra kết quả cuối cùng.
 
 ---
 
-## Cấu trúc dự án
+## 🩺 Giới thiệu dự án
+
+Dự án **BrainTumorAI** là một hệ thống phân loại ảnh MRI não thành **4 lớp**, đi kèm với bản đồ giải thích (Heatmap) giúp bác sĩ/người dùng hiểu được quyết định của AI.
+
+| Lớp | Mô tả | Số lượng Train | Số lượng Test |
+|---|---|---|---|
+| **Glioma** | U thần kinh đệm — phát sinh từ tế bào thần kinh đệm | 1,400 | 400 |
+| **Meningioma** | U màng não — thường lành tính, phát triển chậm | 1,400 | 400 |
+| **Pituitary** | U tuyến yên — có thể gây rối loạn hormone | 1,400 | 400 |
+| **No Tumor** | Não bình thường — lớp đối chứng âm tính | 1,400 | 400 |
+| **Tổng cộng** | **Cân bằng 4 lớp** | **5,600** | **1,600** |
+
+---
+
+## 📁 Cấu trúc dự án
 
 ```text
 BrainTumorAI/
 ├── app/
 │   ├── frontend/         # Next.js Web App (React 19, Tailwind CSS v4)
-│   └── backend/          # FastAPI REST API (Inference & Grad-CAM)
+│   └── backend/          # FastAPI REST API (Inference TTA & Grad-CAM)
 ├── data/
-│   ├── Training/         # Dữ liệu huấn luyện (4 thư mục lớp)
-│   └── Testing/          # Dữ liệu kiểm thử
+│   ├── Training/         # 5,600 ảnh huấn luyện (4 thư mục lớp)
+│   └── Testing/          # 1,600 ảnh kiểm thử độc lập
 ├── docs/                 # Tài liệu hướng dẫn chạy dự án
-├── models/               # Nơi lưu các file checkpoint (.pth, .onnx)
+├── models/               # Nơi lưu checkpoint (.pth, .onnx)
 ├── notebooks/            # Jupyter notebooks (EDA & Đánh giá mô hình)
 ├── reports/              # Nơi lưu JSON metrics và Figures (biểu đồ)
 ├── src/
-│   ├── config.py         # Cấu hình tập trung toàn bộ dự án
+│   ├── config.py         # Cấu hình tập trung toàn bộ dự án (AugConfig, TrainConfig)
 │   ├── utils.py          # Helper functions (seed, paths)
-│   ├── preprocessing/    # Xử lý dữ liệu, augmentation pipeline
-│   ├── training/         # Cấu trúc huấn luyện 2-phase, EarlyStopping
-│   ├── inference/        # Lớp TumorPredictor
+│   ├── preprocessing/    # Xử lý dữ liệu, augmentation pipeline & TTA transforms
+│   ├── training/         # Cấu trúc huấn luyện 2-phase, EarlyStopping, Loss function
+│   ├── inference/        # Lớp TumorPredictor hỗ trợ Single & TTA Inference
 │   └── explainability/   # Tích hợp Grad-CAM tự động phát hiện target layer
 ├── tests/                # Bộ kiểm thử tự động (Pytest)
 ├── .env.example          # Mẫu biến môi trường
@@ -61,7 +75,7 @@ BrainTumorAI/
 
 ---
 
-## Bắt đầu nhanh
+## ⚡ Bắt đầu nhanh
 
 ### 1. Cài đặt Backend (FastAPI & PyTorch)
 
@@ -85,146 +99,117 @@ cd app/frontend
 npm install
 ```
 
-### 3. Khám phá & Tiền xử lý dữ liệu (EDA)
+### 3. Huấn luyện mô hình (Training v2.1)
 
-```python
-# Chạy trong môi trường Python hoặc Jupyter Notebook
-from src.preprocessing.eda import full_eda_report
-full_eda_report(data_dir="data/Training")
-# Báo cáo biểu đồ sẽ lưu tại: reports/figures/eda/
-```
+Mô hình được tối ưu qua quy trình **2-Phase Fine-Tuning** kết hợp **Regularization nâng cao**:
 
-### 4. Huấn luyện mô hình (Training)
-
-Mô hình mặc định được tối ưu qua phương pháp **2-phase fine-tuning**:
-
-1. Đóng băng backbone, chỉ train classifier (5 epochs, LR cao).
-2. Mở băng toàn bộ, fine-tune toàn hệ thống (25 epochs, LR thấp).
+- **Phase 1**: Đóng băng backbone, chỉ train classifier head với Dropout `p=0.3` (5 epochs, LR=1e-3).
+- **Phase 2**: Mở băng toàn bộ mạng (Unfreeze all), fine-tune với Label Smoothing `0.1` và Weight Decay `1e-3` (35 epochs max, LR=1e-4).
 
 ```bash
-# Quay lại thư mục gốc dự án
-# Train bằng EfficientNetB0 (Khuyến nghị)
-python src/training/train.py --model-name efficientnet --epochs 30
+# Train bằng EfficientNetB0 (Mô hình chính)
+python -m src.training.train --model-name efficientnet
 
-# Train bằng DenseNet121 (Làm mô hình đối chiếu chuyên sâu)
-python src/training/train.py --model-name densenet --epochs 20
+# Train bằng DenseNet121 (Mô hình đối chiếu)
+python -m src.training.train --model-name densenet
 ```
 
-> Trọng số tốt nhất sẽ tự động được lưu vào thư mục `models/`.
+### 4. Khởi chạy Hệ thống (Web & API)
 
-### 5. Đánh giá và Xuất mô hình (Tùy chọn)
-
-- **Đánh giá (Evaluation):** Khởi chạy `jupyter notebook` và chạy file `notebooks/02_Model_Compare_Evaluate_Visualize.ipynb` để vẽ Confusion Matrix và ROC-AUC.
-- **Xuất ONNX (Production):** Chuyển đổi trọng số sang ONNX để tăng tốc inference:
-
-```bash
-python src/inference/export_onnx.py --model-name efficientnet --pth-path models/efficientnet_best.pth --onnx-path models/efficientnet_best.onnx
-```
-
-### 6. Khởi động Hệ thống (Phục vụ Dự đoán)
-
-Cần mở 2 Terminal riêng biệt:
+Mở 2 Terminal riêng biệt:
 
 **Terminal 1 — Backend (FastAPI)**
-
 ```bash
 uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 **Terminal 2 — Frontend (Next.js)**
-
 ```bash
 cd app/frontend
 npm run dev
 ```
 
-### 7. Khởi chạy bằng Docker (Siêu tốc)
-
-Nếu máy bạn đã cài Docker Desktop, bạn có thể bỏ qua toàn bộ các bước cài đặt trên. Chỉ cần 1 dòng lệnh duy nhất ở thư mục gốc:
+### 5. Khởi chạy bằng Docker
 
 ```bash
 docker-compose up -d --build
 ```
-
-Hệ thống web sẽ lập tức chạy tại `http://localhost:3000`.
-
----
-
-## Kiểm thử (Testing)
-
-Dự án có bộ test suite với hàng chục test cases bao phủ toàn bộ pipeline:
-
-```bash
-pytest tests/ -v
-```
-
-*Gồm: test_api.py, test_dataset.py, test_eda.py, test_models.py, test_transforms.py, test_utils.py*
+Hệ thống web sẽ chạy tại `http://localhost:3000`.
 
 ---
 
-## Pipeline Machine Learning
+## 🔄 Pipeline Machine Learning & Inference
 
 ```text
-data/Training/
+data/Training/ (5,600 ảnh)
     │
-    ↓ [EDA] class_distribution → check_integrity
-    ↓ [Preprocessing] Stratified split 80/20 · class_weight
-    ↓ [Augmentation] Flip · Rotation · Affine · ColorJitter · RandomErasing
-    ↓ [Phase 1] Freeze backbone → train classifier (lr=1e-3)
-    ↓ [Phase 2] Unfreeze all → fine-tune (lr=1e-4)
-    ↓ [EarlyStopping] patience=5 · restore best weights
+    ↓ [Stratified Split] 80% Train / 20% Val · Class Weighting
+    ↓ [Advanced Augmentation] Rotation 30° · GaussianBlur · Grayscale · Perspective · Erasing
+    ↓ [Phase 1] Freeze backbone → train Sequential(Dropout(0.3), Linear) (5 epochs)
+    ↓ [Phase 2] Unfreeze all → fine-tune + Label Smoothing 0.1 (35 epochs)
+    ↓ [EarlyStopping] patience=7 · restore best weights
     ↓ [Checkpoint] models/efficientnet_best.pth
-    ↓ [Evaluate] Confusion Matrix · ROC-AUC
-    ↓ [Serve] FastAPI /predict → Grad-CAM overlay → Next.js Web App
+    ↓ [Inference Engine] Predictor với Test-Time Augmentation (TTA 5-variant)
+    ↓ [Serve] FastAPI /predict → Grad-CAM Heatmap Overlay → Next.js Web App
 ```
 
 ---
 
-## API Endpoints (Backend)
+## 📡 API Endpoints (Backend)
 
-| Method   | Endpoint     | Mô tả                                        |
-| -------- | ------------ | ---------------------------------------------- |
-| `GET`  | `/`        | Thông tin API cơ bản                        |
-| `GET`  | `/health`  | Kiểm tra trạng thái mô hình và kết nối |
-| `GET`  | `/classes` | Danh sách 4 nhãn phân loại                 |
-| `POST` | `/predict` | Phân loại ảnh + Trả về Grad-CAM           |
-| `GET`  | `/docs`    | Giao diện thử nghiệm Swagger UI             |
+| Method | Endpoint | Mô tả |
+| --- | --- | --- |
+| `GET` | `/` | Thông tin API cơ bản |
+| `GET` | `/health` | Kiểm tra trạng thái mô hình và kết nối |
+| `GET` | `/classes` | Danh sách 4 nhãn phân loại |
+| `POST` | `/predict` | Phân loại ảnh MRI với TTA 5-variant + Trả về Grad-CAM |
+| `GET` | `/docs` | Giao diện thử nghiệm Swagger UI |
 
-**Request `/predict`:** Upload file (PNG / JPEG / JPG), giới hạn mặc định 10MB.
-
-**Response `/predict`:**
+**Response mẫu của `/predict` (Tích hợp TTA):**
 
 ```json
 {
   "class_name": "GLIOMA",
-  "confidence": 0.923456,
+  "confidence": 0.94125,
   "probabilities": {
-    "glioma": 0.923456,
-    "meningioma": 0.042100,
-    "notumor": 0.020200,
-    "pituitary": 0.014244
+    "glioma": 0.94125,
+    "meningioma": 0.03125,
+    "notumor": 0.01500,
+    "pituitary": 0.01250
   },
-  "heatmap_base64": "/9j/4AAQSkZJRgABAQ..."
+  "heatmap_base64": "/9j/4AAQSkZJRgABAQ...",
+  "tta_method": "tta_5",
+  "tta_n": 5
 }
 ```
 
 ---
 
-## Đánh giá hiệu năng (Ước tính)
+## 📊 Đánh giá hiệu năng thực tế (Trên tập Test độc lập 1,600 ảnh)
 
-| Model                                          | Accuracy | Macro F1 |
-| ---------------------------------------------- | -------- | -------- |
-| **EfficientNetB0** (2-phase fine-tuning) | ~95–97% | ~0.95    |
-| **DenseNet121** (Đối chiếu)           | ~94–96% | ~0.94    |
+Báo cáo chi tiết trích xuất từ `reports/model_comparison_report.json`:
+
+| Chỉ số / Mô hình | EfficientNetB0 | DenseNet121 |
+|---|---|---|
+| **Accuracy** | **94.69%** | **95.00%** |
+| **Macro F1-Score** | **0.9457** | **0.9490** |
+| **Macro Precision** | 0.9506 | 0.9539 |
+| **Macro Recall** | 0.9469 | 0.9500 |
+| **Macro AUC** | **0.9885** | **0.9900** |
+| **F1 (Glioma)** | 0.8971 | 0.8999 |
+| **F1 (Meningioma)** | 0.9432 | 0.9302 |
+| **F1 (No Tumor)** | 0.9501 | 0.9732 |
+| **F1 (Pituitary)** | 0.9925 | 0.9925 |
+| **Số mẫu thử nghiệm** | 1,600 | 1,600 |
 
 ---
 
-## Tuyên bố miễn trừ trách nhiệm
+## ⚠️ Tuyên bố miễn trừ trách nhiệm
 
-> ⚠️ **Lưu ý y tế:** Hệ thống này là **công cụ học thuật và hỗ trợ sàng lọc**, **KHÔNG** thay thế cho các chẩn đoán chính thức của bác sĩ chuyên khoa. Mọi quyết định lâm sàng phải dựa trên thăm khám thực tế và ý kiến chuyên môn.
+> **Lưu ý y tế:** Hệ thống này là **công cụ nghiên cứu học thuật và hỗ trợ sàng lọc**, **KHÔNG** thay thế cho các chẩn đoán chính thức của bác sĩ chuyên khoa y tế. Mọi quyết định lâm sàng phải dựa trên thăm khám thực tế và ý kiến chuyên môn từ bác sĩ.
 
 ---
 
-**Tác giả**: Huỳnh Thế Hy
-**Email**: huynhthehy2005@gmail.com
-**Cập nhật lần cuối**: 2026-07-12 — Phiên bản 2.1.0
+**Tác giả**: Huỳnh Thế Hy  
+**Email**: huynhthehy2005@gmail.com  
+**Cập nhật lần cuối**: 2026-07-20 — Phiên bản 2.1.0 Anti-Domain-Shift Edition

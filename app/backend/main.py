@@ -9,6 +9,10 @@ Improvements over v1:
   - File size + extension validation before inference
   - CORS origins restricted (configurable via ALLOWED_ORIGINS env var)
   - gradcam uses upgraded module (auto target layer + overlay_to_base64)
+
+[v2 — Giai đoạn 3: Test-Time Augmentation]
+  - /predict endpoint giờ dùng predict_with_tta() thay vì predict()
+  - Response thêm trường tta_method và tta_n để frontend hiển thị
 """
 from __future__ import annotations
 
@@ -115,6 +119,9 @@ class PredictionResult(BaseModel):
     confidence: float                    # Điểm tin cậy cao nhất (0.0-1.0)
     probabilities: Dict[str, float]      # Xác suất softmax cho cả 4 lớp
     heatmap_base64: str                  # Ảnh Grad-CAM encode Base64
+    # [v2 — Giai đoạn 3] Thông tin TTA để frontend hiển thị
+    tta_method: str = "single"           # 'single' hoặc 'tta_5'
+    tta_n: int = 1                       # Số lần forward pass thực tế
 
 
 class HealthResponse(BaseModel):
@@ -148,7 +155,7 @@ def _validate_upload(file: UploadFile, content: bytes) -> None:
     max_bytes = inference_cfg.max_file_size_mb * 1024 * 1024
     if len(content) > max_bytes:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"File too large. Maximum allowed size: {inference_cfg.max_file_size_mb} MB.",
         )
 
@@ -221,8 +228,10 @@ async def predict(file: UploadFile = File(...)):
         )
 
     # Bước 2: Chạy inference — model dự đoán loại u não
+    # [v2] Dùng predict_with_tta() thay vì predict() để tăng độ chính xác
+    # với ảnh từ nguồn ngoài domain (ảnh bệnh viện khác, ảnh internet)
     try:
-        prediction = _predictor.predict(image)
+        prediction = _predictor.predict_with_tta(image)
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -256,4 +265,7 @@ async def predict(file: UploadFile = File(...)):
         confidence=round(prediction["confidence"], 6),
         probabilities=probs_dict,
         heatmap_base64=heatmap_b64,
+        # [v2 — Giai đoạn 3] Thêm thông tin TTA vào response
+        tta_method=prediction.get("method", "single"),
+        tta_n=prediction.get("tta_n", 1),
     )
