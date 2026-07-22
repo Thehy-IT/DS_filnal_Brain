@@ -1,46 +1,46 @@
 {
   "EfficientNetB0": {
-    "accuracy": 0.946875,
-    "macro_f1": 0.945731,
-    "macro_precision": 0.950574,
-    "macro_recall": 0.946875,
-    "macro_auc": 0.988457,
+    "accuracy": 0.955625,
+    "macro_f1": 0.954754,
+    "macro_precision": 0.958833,
+    "macro_recall": 0.955625,
+    "macro_auc": 0.98737,
     "auc_per_class": {
-      "glioma": 0.960588,
-      "meningioma": 0.994551,
-      "notumor": 0.998727,
-      "pituitary": 0.99996
+      "glioma": 0.959771,
+      "meningioma": 0.99059,
+      "notumor": 0.999121,
+      "pituitary": 1.0
     },
     "per_class_f1": {
-      "glioma": 0.897119,
-      "meningioma": 0.943168,
-      "notumor": 0.950119,
-      "pituitary": 0.992519
+      "glioma": 0.911565,
+      "meningioma": 0.938095,
+      "notumor": 0.976801,
+      "pituitary": 0.992556
     },
     "n_test_samples": 1600,
-    "inference_time_s": 94.55,
-    "classification_report": "              precision    recall  f1-score   support\n\n      glioma     0.9939    0.8175    0.8971       400\n  meningioma     0.9133    0.9750    0.9432       400\n     notumor     0.9050    1.0000    0.9501       400\n   pituitary     0.9900    0.9950    0.9925       400\n\n    accuracy                         0.9469      1600\n   macro avg     0.9506    0.9469    0.9457      1600\nweighted avg     0.9506    0.9469    0.9457      1600\n"
+    "inference_time_s": 56.85,
+    "classification_report": "              precision    recall  f1-score   support\n\n      glioma     1.0000    0.8375    0.9116       400\n  meningioma     0.8955    0.9850    0.9381       400\n     notumor     0.9547    1.0000    0.9768       400\n   pituitary     0.9852    1.0000    0.9926       400\n\n    accuracy                         0.9556      1600\n   macro avg     0.9588    0.9556    0.9548      1600\nweighted avg     0.9588    0.9556    0.9548      1600\n"
   },
   "DenseNet121": {
-    "accuracy": 0.95,
-    "macro_f1": 0.948953,
-    "macro_precision": 0.953899,
-    "macro_recall": 0.95,
-    "macro_auc": 0.990019,
+    "accuracy": 0.94875,
+    "macro_f1": 0.947813,
+    "macro_precision": 0.951312,
+    "macro_recall": 0.94875,
+    "macro_auc": 0.991889,
     "auc_per_class": {
-      "glioma": 0.9669,
-      "meningioma": 0.993286,
-      "notumor": 0.999944,
-      "pituitary": 0.999946
+      "glioma": 0.974048,
+      "meningioma": 0.994958,
+      "notumor": 0.999223,
+      "pituitary": 0.999325
     },
     "per_class_f1": {
-      "glioma": 0.899863,
-      "meningioma": 0.930178,
-      "notumor": 0.973236,
-      "pituitary": 0.992537
+      "glioma": 0.909091,
+      "meningioma": 0.93932,
+      "notumor": 0.963855,
+      "pituitary": 0.978986
     },
     "n_test_samples": 1600,
-    "inference_time_s": 159.31,
-    "classification_report": "              precision    recall  f1-score   support\n\n      glioma     0.9970    0.8200    0.8999       400\n  meningioma     0.8831    0.9825    0.9302       400\n     notumor     0.9479    1.0000    0.9732       400\n   pituitary     0.9876    0.9975    0.9925       400\n\n    accuracy                         0.9500      1600\n   macro avg     0.9539    0.9500    0.9490      1600\nweighted avg     0.9539    0.9500    0.9490      1600\n"
+    "inference_time_s": 2627.24,
+    "classification_report": "              precision    recall  f1-score   support\n\n      glioma     0.9941    0.8375    0.9091       400\n  meningioma     0.9127    0.9675    0.9393       400\n     notumor     0.9302    1.0000    0.9639       400\n   pituitary     0.9682    0.9900    0.9790       400\n\n    accuracy                         0.9487      1600\n   macro avg     0.9513    0.9487    0.9478      1600\nweighted avg     0.9513    0.9487    0.9478      1600\n"
   }
 }
