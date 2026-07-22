@@ -15,7 +15,7 @@
 Sau khi kiểm thử thực tế với hình ảnh MRI bên ngoài (Out-of-Distribution / External Data), hệ thống đã được phân tích chuyên sâu và nâng cấp toàn bộ pipeline để **khắc phục hiện tượng Domain Shift (lệch phân phối dữ liệu)** và chống suy giảm hiệu năng khi dự đoán ảnh ngoài tập dữ liệu mẫu:
 
 1. **Phân tích Overfitting & Domain Shift**:
-   - Khoảng cách giữa Train Acc (99.75%) và Validation Acc (99.11%) chỉ là **0.64%** (Val Loss không tăng), khẳng định mô hình **không bị overfitting thuần túy** trên tập nội bộ.
+   - Khoảng cách giữa Train Acc (99.69%) và Validation Acc (99.29%) chỉ là **0.40%** (Val Loss không tăng), khẳng định mô hình **không bị overfitting thuần túy** trên tập nội bộ.
    - Nguyên nhân dự đoán sai ảnh bên ngoài là do **Domain Shift** (khác biệt thiết bị MRI, độ phân giải, độ sáng/tương phản giữa các cơ sở y tế).
 2. **Nâng cấp Data Augmentation (Giai đoạn 1)**:
    - Thêm `GaussianBlur` (30% xác suất) mô phỏng ảnh MRI độ phân giải thấp.
@@ -191,16 +191,37 @@ Báo cáo chi tiết trích xuất từ `reports/model_comparison_report.json`:
 
 | Chỉ số / Mô hình | EfficientNetB0 | DenseNet121 |
 |---|---|---|
-| **Accuracy** | **94.69%** | **95.00%** |
-| **Macro F1-Score** | **0.9457** | **0.9490** |
-| **Macro Precision** | 0.9506 | 0.9539 |
-| **Macro Recall** | 0.9469 | 0.9500 |
-| **Macro AUC** | **0.9885** | **0.9900** |
-| **F1 (Glioma)** | 0.8971 | 0.8999 |
-| **F1 (Meningioma)** | 0.9432 | 0.9302 |
-| **F1 (No Tumor)** | 0.9501 | 0.9732 |
-| **F1 (Pituitary)** | 0.9925 | 0.9925 |
+| **Accuracy** | **95.56%** | 94.88% |
+| **Macro F1-Score** | **0.9548** | 0.9478 |
+| **Macro Precision** | **0.9588** | 0.9513 |
+| **Macro Recall** | **0.9556** | 0.9488 |
+| **Macro AUC** | 0.9874 | **0.9919** |
+| **F1 (Glioma)** | **0.9116** | 0.9091 |
+| **F1 (Meningioma)** | 0.9381 | **0.9393** |
+| **F1 (No Tumor)** | **0.9768** | 0.9639 |
+| **F1 (Pituitary)** | **0.9926** | 0.9790 |
+| **Thời gian nội suy** | **56.85s** | 2627.24s |
 | **Số mẫu thử nghiệm** | 1,600 | 1,600 |
+
+### 📈 Trực quan hóa Đánh giá (Visualization Reports)
+
+Dưới đây là các biểu đồ phân tích chuyên sâu (được lưu tại `reports/figures/comparison`):
+
+**1. Báo cáo Tổng hợp (Dashboard Report)**
+Tổng quan hiệu suất đa chiều giữa EfficientNetB0 (Mô hình chính) và DenseNet121 (Mô hình đối chiếu).
+![Dashboard Report](reports/figures/comparison/dashboard_report.png)
+
+**2. So sánh Ma trận nhầm lẫn (Confusion Matrix)**
+Hiển thị mức độ nhầm lẫn giữa các lớp, qua đó thấy được mô hình xử lý rất tốt các ca No Tumor và Pituitary, đồng thời tối ưu việc phân biệt giữa Glioma và Meningioma.
+![Confusion Matrices](reports/figures/comparison/confusion_matrices_comparison.png)
+
+**3. Đường cong ROC & AUC**
+Khả năng phân biệt của từng lớp mô hình ở các ngưỡng Threshold khác nhau. Cả hai mô hình đều đạt AUC rất cao (trên 0.98).
+![ROC Curves](reports/figures/comparison/roc_curves_comparison.png)
+
+**4. Lịch sử Huấn luyện (Training History)**
+Theo dõi đường cong Loss và Accuracy, đảm bảo hệ thống hội tụ tốt và không bị Overfitting nặng nhờ áp dụng Early Stopping và Regularization.
+![Training History](reports/figures/comparison/training_history_styled.png)
 
 ---
 
@@ -212,4 +233,4 @@ Báo cáo chi tiết trích xuất từ `reports/model_comparison_report.json`:
 
 **Tác giả**: Huỳnh Thế Hy  
 **Email**: huynhthehy2005@gmail.com  
-**Cập nhật lần cuối**: 2026-07-20 — Phiên bản 2.1.0 Anti-Domain-Shift Edition
+**Cập nhật lần cuối**: 2026-07-22 — Phiên bản 2.1.0 Anti-Domain-Shift Edition (Trained Update)
